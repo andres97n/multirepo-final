@@ -24,29 +24,29 @@ An empty but fully gated pnpm + Turborepo workspace. Lint, typecheck, format and
 
 ## Tasks
 
-- [ ] `git init`, initial branch `main`.
-- [ ] `.gitignore`: node_modules, dist, .next, coverage, .turbo, `.env*` (except `.env.example`), agent state (.omc, .omo, .recall, .tasks, .scratch).
-- [ ] `.gitattributes` (LF), `.editorconfig`, `.nvmrc` (24), `.npmrc` (`engine-strict=true`).
-- [ ] Root `package.json`:
+- [x] `git init`, initial branch `main`.
+- [x] `.gitignore`: node_modules, dist, .next, coverage, .turbo, `.env*` (except `.env.example`), agent state (.omc, .omo, .recall, .tasks, .scratch).
+- [x] `.gitattributes` (LF), `.editorconfig`, `.nvmrc` (24), `.npmrc` (`engine-strict=true`).
+- [x] Root `package.json`:
   - `private`, `packageManager` pnpm 11 (with hash), `engines`.
   - Scripts: `dev`, `build`, `lint`, `typecheck`, `test`, `test:e2e`, `format`, `format:check`. `modules:check` is added in M11.
   - `boilerplate.version: 0.0.0`.
-- [ ] `pnpm-workspace.yaml`: `apps/*`, `packages/*`, `minimumReleaseAge`, `onlyBuiltDependencies` allowlist (empty for now).
-- [ ] `turbo.json`:
+- [x] `pnpm-workspace.yaml`: `apps/*`, `packages/*`, `minimumReleaseAge`, `onlyBuiltDependencies` allowlist (empty for now).
+- [x] `turbo.json`:
   - `build`, `lint`, `typecheck`, `test`, `test:e2e`, `dev`, with correct `dependsOn`, `inputs` and `outputs`.
   - `env` declared per task; `globalDependencies` include the tsconfig and eslint presets.
-- [ ] `packages/config-typescript`:
+- [x] `packages/config-typescript`:
   - `base.json` (`strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitOverride`, `verbatimModuleSyntax` where compatible).
   - `library.json`, `nest.json` (emitDecoratorMetadata, experimentalDecorators), `next.json`.
-- [ ] `packages/config-eslint`:
+- [x] `packages/config-eslint`:
   - `base.js`: @eslint/js + typescript-eslint `strictTypeChecked` + eslint-config-prettier.
   - `nest.js`, `next.js` (next plugin + react-hooks).
   - The package lints itself.
-- [ ] `prettier.config.mjs` + `.prettierignore`.
-- [ ] Husky `pre-commit` runs `lint-staged`. `lint-staged.config.mjs`: prettier --write on all staged files, eslint --fix --max-warnings 0 on staged TS/JS.
-- [ ] Verify that the latest stable TS works with typescript-eslint. Otherwise pin the newest compatible version (see ADR-0001).
-- [ ] `docs/adr/0000-template.md`, `docs/adr/0001-monorepo-and-tooling.md`.
-- [ ] Minimal `README.md` (quick start placeholder) and `AGENTS.md` stub that points to `docs/`.
+- [x] `prettier.config.mjs` + `.prettierignore`.
+- [x] Husky `pre-commit` runs `lint-staged`. `lint-staged.config.mjs`: prettier --write on all staged files, eslint --fix --max-warnings 0 on staged TS/JS.
+- [x] Verify that the latest stable TS works with typescript-eslint. Otherwise pin the newest compatible version (see ADR-0001).
+- [x] `docs/adr/0000-template.md`, `docs/adr/0001-monorepo-and-tooling.md`.
+- [x] Minimal `README.md` (quick start placeholder) and `AGENTS.md` stub that points to `docs/`.
 
 ## Deliverables
 
