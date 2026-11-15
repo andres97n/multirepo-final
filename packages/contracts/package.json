@@ -1,0 +1,103 @@
+{
+  "name": "@repo/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./http": {
+      "import": {
+        "types": "./dist/http.d.ts",
+        "default": "./dist/http.js"
+      },
+      "require": {
+        "types": "./dist/http.d.cts",
+        "default": "./dist/http.cjs"
+      }
+    },
+    "./errors": {
+      "import": {
+        "types": "./dist/errors.d.ts",
+        "default": "./dist/errors.js"
+      },
+      "require": {
+        "types": "./dist/errors.d.cts",
+        "default": "./dist/errors.cjs"
+      }
+    },
+    "./pagination": {
+      "import": {
+        "types": "./dist/pagination.d.ts",
+        "default": "./dist/pagination.js"
+      },
+      "require": {
+        "types": "./dist/pagination.d.cts",
+        "default": "./dist/pagination.cjs"
+      }
+    },
+    "./filters": {
+      "import": {
+        "types": "./dist/filters.d.ts",
+        "default": "./dist/filters.js"
+      },
+      "require": {
+        "types": "./dist/filters.d.cts",
+        "default": "./dist/filters.cjs"
+      }
+    },
+    "./health": {
+      "import": {
+        "types": "./dist/health.d.ts",
+        "default": "./dist/health.js"
+      },
+      "require": {
+        "types": "./dist/health.d.cts",
+        "default": "./dist/health.cjs"
+      }
+    },
+    "./auth": {
+      "import": {
+        "types": "./dist/auth.d.ts",
+        "default": "./dist/auth.js"
+      },
+      "require": {
+        "types": "./dist/auth.d.cts",
+        "default": "./dist/auth.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "zod": "^4.0.0"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "check:exports": "node scripts/check-exports.mjs"
+  },
+  "devDependencies": {
+    "@repo/config-eslint": "workspace:*",
+    "@repo/config-typescript": "workspace:*",
+    "@vitest/coverage-v8": "5.1.0",
+    "eslint": "10.15.0",
+    "tsdown": "0.23.7",
+    "typescript": "6.0.3",
+    "vitest": "5.1.0",
+    "zod": "4.6.7"
+  }
+}

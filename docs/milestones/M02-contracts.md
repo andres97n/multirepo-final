@@ -2,7 +2,7 @@
 
 | Field      | Value                                                          |
 | ---------- | -------------------------------------------------------------- |
-| Status     | Not started                                                    |
+| Status     | Done                                                           |
 | Depends on | [M01](./M01-repo-skeleton.md)                                  |
 | PRD refs   | §4.1 contracts, §7 data model, FR-2.10, NFR-QUAL-1, NFR-QUAL-2 |
 | Axes       | 2 (Shared contracts), 3 (Monorepo)                             |
@@ -21,17 +21,17 @@ Schemas for envelopes, error codes, pagination, filters, health and auth (auth l
 
 ## Tasks
 
-- [ ] `packages/contracts` package with `exports` map: `.`, `./http`, `./errors`, `./pagination`, `./filters`, `./health`, `./auth`.
-- [ ] `http/`: `successEnvelope(schema)` factory, `ErrorEnvelope` (`code`, `message`, `details?`, `requestId`).
-- [ ] `errors/`: `ErrorCode` enum (VALIDATION_FAILED, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, CONFLICT, RATE_LIMITED, INTERNAL).
-- [ ] `pagination/`: `PageQuery` (page ≥ 1 default 1, limit 1..100 default 20, `sort` as `field:asc|desc`), `paginated(schema)` factory.
-- [ ] `filters/`: `filterSpec({ allowedFields, allowedOps })` builder. It rejects unknown fields and operators.
-- [ ] `health/`: `Health` (`status: ok|degraded|down`, `checks` record).
-- [ ] `auth/` (module `auth`):
+- [x] `packages/contracts` package with `exports` map: `.`, `./http`, `./errors`, `./pagination`, `./filters`, `./health`, `./auth`.
+- [x] `http/`: `successEnvelope(schema)` factory, `ErrorEnvelope` (`code`, `message`, `details?`, `requestId`).
+- [x] `errors/`: `ErrorCode` enum (VALIDATION_FAILED, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, CONFLICT, RATE_LIMITED, INTERNAL).
+- [x] `pagination/`: `PageQuery` (page ≥ 1 default 1, limit 1..100 default 20, `sort` as `field:asc|desc`), `paginated(schema)` factory.
+- [x] `filters/`: `filterSpec({ allowedFields, allowedOps })` builder. It rejects unknown fields and operators.
+- [x] `health/`: `Health` (`status: ok|degraded|down`, `checks` record).
+- [x] `auth/` (module `auth`):
   - `LoginInput` (email trimmed and lowercased, password policy), `MeResponse`, `Role` (`user|admin`), `PASSWORD_POLICY` constants.
-- [ ] tsdown build: ESM + CJS + `.d.ts`, sourcemaps.
-- [ ] Vitest unit tests with a coverage threshold.
-- [ ] `packages/contracts/AGENTS.md` (short): contract-first rule, how to add a schema.
+- [x] tsdown build: ESM + CJS + `.d.ts`, sourcemaps.
+- [x] Vitest unit tests with a coverage threshold.
+- [x] `packages/contracts/AGENTS.md` (short): contract-first rule, how to add a schema.
 
 ## Deliverables
 
