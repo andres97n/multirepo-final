@@ -1,0 +1,9 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Block packages published less than 1 day ago (minutes)
+minimumReleaseAge: 1440
+
+# Install scripts are opt-in: add packages here deliberately
+onlyBuiltDependencies: []
