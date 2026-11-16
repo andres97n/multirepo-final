@@ -46,7 +46,7 @@ A NestJS 11 app with no database and no auth that already has validated config, 
 - [x] `@nestjs/throttler`: global limits from env; 429 rendered through the error envelope.
 - [x] `GET /api/v1/health/live` → `Health` contract, always 200 while the process runs.
 - [x] OpenAPI generated from Zod at `/api/docs`. Disabled when `NODE_ENV=production` unless `API_DOCS_ENABLED=true`.
-- [x] Vitest config with `unplugin-swc` (decoratorMetadata) for unit tests; `vitest.e2e.config.ts` + supertest.
+- [x] Vitest config with `unplugin-swc` (decoratorMetadata) for unit tests; `vitest.e2e.config.mts` + supertest.
 - [x] Handlers for `unhandledRejection` / `uncaughtException` that log and exit non-zero.
 - [x] `apps/api/.env.example`, `apps/api/AGENTS.md` (short digest).
 
