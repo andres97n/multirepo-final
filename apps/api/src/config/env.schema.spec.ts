@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { composeEnvSchema, coreEnvFragment, envSchema, secretFragment } from './env.schema';
+import { composeEnvSchema, coreEnvFragment, envSchema } from './env.schema';
 
 describe('env schema', () => {
   it('accepts a minimal development env with defaults', () => {
@@ -36,8 +36,8 @@ describe('env schema', () => {
     }
   });
 
-  it('rejects a short secret in production (via a secret fragment)', () => {
-    const schema = composeEnvSchema(coreEnvFragment, secretFragment({ MY_SECRET: z.string() }));
+  it('rejects a short secret in production (via a fragment)', () => {
+    const schema = composeEnvSchema(coreEnvFragment, z.object({ MY_SECRET: z.string() }));
     const result = schema.safeParse({
       NODE_ENV: 'production',
       CORS_ORIGIN: 'https://example.com',
@@ -50,7 +50,7 @@ describe('env schema', () => {
   });
 
   it('rejects an example-value secret in production', () => {
-    const schema = composeEnvSchema(coreEnvFragment, secretFragment({ MY_SECRET: z.string() }));
+    const schema = composeEnvSchema(coreEnvFragment, z.object({ MY_SECRET: z.string() }));
     const result = schema.safeParse({
       NODE_ENV: 'production',
       CORS_ORIGIN: 'https://example.com',
@@ -60,12 +60,29 @@ describe('env schema', () => {
   });
 
   it('accepts a valid secret in production', () => {
-    const schema = composeEnvSchema(coreEnvFragment, secretFragment({ MY_SECRET: z.string() }));
+    const schema = composeEnvSchema(coreEnvFragment, z.object({ MY_SECRET: z.string() }));
+    const result = schema.safeParse({
+      NODE_ENV: 'production',
+      CORS_ORIGIN: 'https://example.com',
+      MY_SECRET: 'Zq8vK2mXr9LpT4wYc7NbH3sFj6DgA1eU',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a low-entropy secret in production', () => {
+    const schema = composeEnvSchema(coreEnvFragment, z.object({ MY_SECRET: z.string() }));
     const result = schema.safeParse({
       NODE_ENV: 'production',
       CORS_ORIGIN: 'https://example.com',
       MY_SECRET: 'a'.repeat(40),
     });
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects wildcard and null CORS origins in production', () => {
+    for (const origin of ['https://*.example.com', 'null']) {
+      const result = envSchema.safeParse({ NODE_ENV: 'production', CORS_ORIGIN: origin });
+      expect(result.success, origin).toBe(false);
+    }
   });
 });

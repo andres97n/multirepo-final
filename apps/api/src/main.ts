@@ -7,15 +7,18 @@ import { AppModule } from './app.module';
 import { configureApp } from './configure-app';
 import { validateEnv } from './config/validate-env';
 
-process.on('uncaughtException', (error) => {
-  console.error('FATAL: uncaughtException', error);
+/** One pino-shaped JSON line (level 60 = fatal), then exit non-zero. */
+function fatal(msg: string, error: unknown): never {
+  const err =
+    error instanceof Error
+      ? { type: error.name, message: error.message, stack: error.stack }
+      : { message: String(error) };
+  console.error(JSON.stringify({ level: 60, time: Date.now(), msg, err }));
   process.exit(1);
-});
+}
 
-process.on('unhandledRejection', (reason) => {
-  console.error('FATAL: unhandledRejection', reason);
-  process.exit(1);
-});
+process.on('uncaughtException', (error) => fatal('uncaughtException', error));
+process.on('unhandledRejection', (reason) => fatal('unhandledRejection', reason));
 
 async function bootstrap(): Promise<void> {
   if (existsSync('.env')) {

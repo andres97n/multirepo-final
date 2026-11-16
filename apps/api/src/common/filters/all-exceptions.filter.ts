@@ -13,7 +13,7 @@ import { ZodValidationException } from 'nestjs-zod';
 import { ZodError } from 'zod';
 import { APP_CONFIG, type AppConfig } from '../../config/app-config';
 import { getRequestId } from '../request-context';
-import { resolveRequestId } from '../request-id';
+import { generateRequestId } from '../request-id';
 
 const STATUS_TO_CODE: Readonly<Record<number, ErrorCode>> = {
   [HttpStatus.BAD_REQUEST]: ErrorCodes.VALIDATION_FAILED,
@@ -58,11 +58,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request & { id?: string }>();
 
+    // The request-id middleware is the single source (`req.id`); the ALS value is a fallback.
     const requestId =
-      getRequestId() ??
-      (typeof request.id === 'string' && request.id.length > 0
+      typeof request.id === 'string' && request.id.length > 0
         ? request.id
-        : resolveRequestId(request.headers['x-request-id']));
+        : (getRequestId() ?? generateRequestId());
 
     let status: number;
     let code: ErrorCode;

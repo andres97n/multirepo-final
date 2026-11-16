@@ -33,7 +33,7 @@ export function configureApp(app: NestExpressApplication): NestExpressApplicatio
 
   if (config.NODE_ENV !== 'production' || config.API_DOCS_ENABLED) {
     const swaggerConfig = new DocumentBuilder()
-      .setTitle('ax-orchester API')
+      .setTitle('API')
       .setDescription(
         'Validated config, contract-based validation, uniform errors, request ids, safe logging, security.',
       )

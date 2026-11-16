@@ -29,21 +29,18 @@ export const coreEnvFragment = z.object({
 
 export type EnvFragment = z.ZodObject<z.ZodRawShape>;
 
-/**
- * Convenience for optional modules that contribute `*_SECRET` variables. The
- * production rules in `composeEnvSchema` validate every `*_SECRET` key by name.
- */
-export function secretFragment<const T extends z.ZodRawShape>(shape: T): z.ZodObject<T> {
-  return z.object(shape);
-}
-
 const SECRET_MIN_BYTES = 32;
 const EXAMPLE_SECRET_PATTERN = /(example|changeme|change-me|placeholder)/i;
+const SECRET_MIN_DISTINCT_CHARS = 8;
+
+function looksLikeExampleSecret(value: string): boolean {
+  return EXAMPLE_SECRET_PATTERN.test(value) || new Set(value).size < SECRET_MIN_DISTINCT_CHARS;
+}
 
 /**
  * Merges the given fragments and applies the production-only superRefine:
  * - `CORS_ORIGIN` must not contain `*`;
- * - every `*_SECRET` value must be >= 32 bytes and must not be an example value.
+ * - every `*_SECRET` value must be >= 32 bytes and must not be an example/low-entropy value.
  */
 export function composeEnvSchema(...fragments: EnvFragment[]) {
   const shape = fragments.reduce<z.ZodRawShape>(
@@ -74,7 +71,7 @@ export function composeEnvSchema(...fragments: EnvFragment[]) {
           path: [key],
           message: `${key} must be at least ${String(SECRET_MIN_BYTES)} bytes in production`,
         });
-      } else if (EXAMPLE_SECRET_PATTERN.test(value)) {
+      } else if (looksLikeExampleSecret(value)) {
         ctx.addIssue({
           code: 'custom',
           path: [key],

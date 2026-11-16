@@ -3,7 +3,7 @@ import { LoggerModule as PinoLoggerModule } from 'nestjs-pino';
 import type { IncomingMessage } from 'node:http';
 import type { DestinationStream } from 'pino';
 import type { Options } from 'pino-http';
-import { resolveRequestId } from '../../common/request-id';
+import { generateRequestId } from '../../common/request-id';
 import { APP_CONFIG, type AppConfig } from '../../config/app-config';
 
 export const REDACT_PATHS = [
@@ -30,12 +30,15 @@ export function buildPinoHttpOptions(config: AppConfig, stream?: DestinationStre
   const base: Options = {
     level: config.LOG_LEVEL,
     genReqId: (req: IncomingMessage) =>
-      typeof req.id === 'string' && req.id.length > 0
-        ? req.id
-        : resolveRequestId(req.headers['x-request-id']),
+      typeof req.id === 'string' && req.id.length > 0 ? req.id : generateRequestId(),
     redact: redactConfig,
     serializers: {
-      req: (req: IncomingMessage) => ({ id: req.id, method: req.method, url: req.url }),
+      // Path only: query strings may carry tokens.
+      req: (req: IncomingMessage) => ({
+        id: req.id,
+        method: req.method,
+        url: req.url?.split('?')[0],
+      }),
       res: (res: { statusCode?: number }) => ({ statusCode: res.statusCode }),
     },
     customProps: (req: IncomingMessage) => ({ requestId: req.id }),
