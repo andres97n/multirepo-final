@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
-import { asErrorEnvelope, buildApp } from './helpers';
+import { asErrorEnvelope, buildApp, withEnv } from './helpers';
 
 function hasHealthSchema(body: unknown): boolean {
   const schemas =
@@ -8,40 +8,40 @@ function hasHealthSchema(body: unknown): boolean {
   return Object.keys(schemas).some((key) => key.toLowerCase().includes('health'));
 }
 
+const production = { NODE_ENV: 'production', CORS_ORIGIN: 'https://example.com' };
+
 describe('OpenAPI docs (AC-M03.7)', () => {
   it('serves the spec in development and contains the Health schema', async () => {
-    process.env.NODE_ENV = 'development';
-    const app = await buildApp();
-    const res = await request(app.getHttpServer()).get('/api/docs-json');
-    expect(res.status).toBe(200);
-    expect(hasHealthSchema(res.body)).toBe(true);
-    await app.close();
-    delete process.env.NODE_ENV;
+    await withEnv({ NODE_ENV: 'development' }, async () => {
+      const app = await buildApp();
+      const res = await request(app.getHttpServer()).get('/api/docs-json');
+      expect(res.status).toBe(200);
+      expect(hasHealthSchema(res.body)).toBe(true);
+      await app.close();
+    });
   });
 
-  it('returns 404 in production by default', async () => {
-    process.env.NODE_ENV = 'production';
-    process.env.CORS_ORIGIN = 'https://example.com';
-    const app = await buildApp();
-    const res = await request(app.getHttpServer()).get('/api/docs-json');
-    expect(res.status).toBe(404);
-    expect(asErrorEnvelope(res.body).error.code).toBe('NOT_FOUND');
-    await app.close();
-    delete process.env.NODE_ENV;
-    delete process.env.CORS_ORIGIN;
+  it('returns 404 for the UI and the spec in production by default', async () => {
+    await withEnv({ ...production, API_DOCS_ENABLED: undefined }, async () => {
+      const app = await buildApp();
+      for (const path of ['/api/docs', '/api/docs-json']) {
+        const res = await request(app.getHttpServer()).get(path);
+        expect(res.status).toBe(404);
+        expect(asErrorEnvelope(res.body).error.code).toBe('NOT_FOUND');
+      }
+      await app.close();
+    });
   });
 
-  it('serves the spec in production when API_DOCS_ENABLED=true', async () => {
-    process.env.NODE_ENV = 'production';
-    process.env.CORS_ORIGIN = 'https://example.com';
-    process.env.API_DOCS_ENABLED = 'true';
-    const app = await buildApp();
-    const res = await request(app.getHttpServer()).get('/api/docs-json');
-    expect(res.status).toBe(200);
-    expect(hasHealthSchema(res.body)).toBe(true);
-    await app.close();
-    delete process.env.NODE_ENV;
-    delete process.env.CORS_ORIGIN;
-    delete process.env.API_DOCS_ENABLED;
+  it('serves the UI and the spec in production when API_DOCS_ENABLED=true', async () => {
+    await withEnv({ ...production, API_DOCS_ENABLED: 'true' }, async () => {
+      const app = await buildApp();
+      const ui = await request(app.getHttpServer()).get('/api/docs');
+      expect(ui.status).toBe(200);
+      const res = await request(app.getHttpServer()).get('/api/docs-json');
+      expect(res.status).toBe(200);
+      expect(hasHealthSchema(res.body)).toBe(true);
+      await app.close();
+    });
   });
 });

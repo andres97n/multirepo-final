@@ -3,7 +3,7 @@ import { createZodDto } from 'nestjs-zod';
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { asErrorEnvelope, buildApp } from './helpers';
+import { asErrorEnvelope, buildApp, withEnv } from './helpers';
 
 class CreateItemDto extends createZodDto(z.object({ name: z.string().min(3) })) {}
 
@@ -60,18 +60,17 @@ describe('errors (AC-M03.2, AC-M03.3, AC-M03.4)', () => {
   });
 
   it('unknown error -> 500 INTERNAL with no stack/message leakage in production', async () => {
-    process.env.NODE_ENV = 'production';
-    process.env.CORS_ORIGIN = 'https://example.com';
-    const app = await buildApp([TestOnlyController]);
-    const res = await request(app.getHttpServer()).get('/api/v1/test-only/boom');
-    const envelope = asErrorEnvelope(res.body);
-    expect(res.status).toBe(500);
-    expect(envelope.error.code).toBe('INTERNAL');
-    expect(envelope.error.message).toBe('Internal server error');
-    expect(JSON.stringify(res.body)).not.toContain('kaboom');
-    expect(JSON.stringify(res.body)).not.toContain('at ');
-    await app.close();
-    delete process.env.NODE_ENV;
-    delete process.env.CORS_ORIGIN;
+    await withEnv({ NODE_ENV: 'production', CORS_ORIGIN: 'https://example.com' }, async () => {
+      const app = await buildApp([TestOnlyController]);
+      const res = await request(app.getHttpServer()).get('/api/v1/test-only/boom');
+      const envelope = asErrorEnvelope(res.body);
+      expect(res.status).toBe(500);
+      expect(envelope.error.code).toBe('INTERNAL');
+      expect(envelope.error.message).toBe('Internal server error');
+      expect(envelope.error.requestId).toBe(res.headers['x-request-id']);
+      expect(JSON.stringify(res.body)).not.toContain('kaboom');
+      expect(JSON.stringify(res.body)).not.toContain('at ');
+      await app.close();
+    });
   });
 });
