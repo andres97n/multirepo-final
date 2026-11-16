@@ -1,0 +1,10 @@
+{
+  "extends": "@repo/config-typescript/nest.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "dist",
+    "types": ["node"]
+  },
+  "include": ["src", "test", "*.ts"]
+}

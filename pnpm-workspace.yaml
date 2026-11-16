@@ -6,4 +6,6 @@ packages:
 minimumReleaseAge: 1440
 
 # Install scripts are opt-in: add packages here deliberately
-onlyBuiltDependencies: []
+allowBuilds:
+  '@swc/core': true
+  '@scarf/scarf': false
