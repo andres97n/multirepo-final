@@ -2,6 +2,26 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.2.1] - 2026-11-15
+
+### Fixed
+
+- **21:10 — `12fb842` fix(api): exempt health from throttling and harden logging and secrets**
+  - `GET /api/v1/health/live` is no longer rate limited, so Docker/orchestrator probes cannot get 429.
+  - Fatal `uncaughtException`/`unhandledRejection` handlers emit one pino-shaped JSON line and exit 1.
+  - Logged `req.url` drops the query string (no tokens in logs); the request id now has a single source (the middleware).
+  - Production rejects low-entropy secrets (< 8 distinct characters); removed the unused `secretFragment` helper and the hard-coded Swagger title.
+
+### Changed
+
+- **`a0405aa` build(api): rename vitest configs to .mts** — removes the Vite ESM-in-CommonJS warning.
+
+### Added
+
+- **`894cc96` test(api): cover remaining AC gaps and restore env after e2e**
+  - New tests: log-line request id, 200-char id replacement, HSTS, allowlisted CORS, docs UI 404 in production, never-throttled health.
+  - `withEnv` test helper restores `process.env` even when assertions fail.
+
 ## [0.2.0] - 2026-11-15
 
 ### Added
