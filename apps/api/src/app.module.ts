@@ -8,6 +8,9 @@ import { ConfigModule } from './config/config.module';
 // @module:db-mongo
 import { MongoDatabaseModule } from './infra/database/mongo';
 // @end-module:db-mongo
+// @module:db-postgres
+// import { PostgresDatabaseModule } from './infra/database/postgres';
+// @end-module:db-postgres
 import { HealthModule } from './infra/health/health.module';
 import { LoggerModule } from './infra/logger/logger.module';
 
@@ -18,6 +21,9 @@ import { LoggerModule } from './infra/logger/logger.module';
     // @module:db-mongo
     MongoDatabaseModule.forRoot(),
     // @end-module:db-mongo
+    // @module:db-postgres
+    // PostgresDatabaseModule.forRoot(),
+    // @end-module:db-postgres
     HealthModule,
     ThrottlerModule.forRootAsync({
       inject: [APP_CONFIG],

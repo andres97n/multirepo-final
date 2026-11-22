@@ -2,6 +2,9 @@ import { z } from 'zod';
 // @module:db-mongo
 import { mongoEnvFragment } from '../infra/database/mongo/mongo.env';
 // @end-module:db-mongo
+// @module:db-postgres
+// import { postgresEnvFragment } from '../infra/database/postgres/postgres.env';
+// @end-module:db-postgres
 
 const boolFromString = z.enum(['true', 'false']).transform((value) => value === 'true');
 
@@ -100,6 +103,9 @@ export const envSchema = composeEnvSchema(
   // @module:db-mongo
   mongoEnvFragment,
   // @end-module:db-mongo
+  // @module:db-postgres
+  // postgresEnvFragment,
+  // @end-module:db-postgres
 );
 
 /**
@@ -112,5 +118,8 @@ type ModuleEnv =
   // @module:db-mongo
   z.infer<typeof mongoEnvFragment> &
     // @end-module:db-mongo
+    // @module:db-postgres
+    // z.infer<typeof postgresEnvFragment> &
+    // @end-module:db-postgres
     Record<never, never>;
 export type AppConfig = z.infer<typeof coreEnvFragment> & ModuleEnv;

@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConnectionStates, type Connection } from 'mongoose';
-import { APP_CONFIG, type AppConfig } from '../../../config/app-config';
+import { APP_CONFIG } from '../../../config/app-config';
 import type { DatabaseHealth, DatabaseHealthResult } from '../core/health';
 import { MONGO_CONNECTION } from './mongo.constants';
+import type { MongoConfig } from './mongo.env';
 
 /**
  * Readiness probe for the Mongo adapter: a lightweight `ping` guarded by
@@ -13,7 +14,7 @@ import { MONGO_CONNECTION } from './mongo.constants';
 export class MongoHealthIndicator implements DatabaseHealth {
   constructor(
     @Inject(MONGO_CONNECTION) private readonly connection: Connection,
-    @Inject(APP_CONFIG) private readonly config: Pick<AppConfig, 'MONGO_TIMEOUT_MS'>,
+    @Inject(APP_CONFIG) private readonly config: Pick<MongoConfig, 'MONGO_TIMEOUT_MS'>,
   ) {}
 
   async check(): Promise<DatabaseHealthResult> {

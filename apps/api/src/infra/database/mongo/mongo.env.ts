@@ -7,3 +7,9 @@ export const mongoEnvFragment = z.object({
   MONGO_URI: z.string().regex(MONGO_URI_PATTERN).optional().meta({ requiredInProduction: true }),
   MONGO_TIMEOUT_MS: z.coerce.number().int().min(100).default(DEFAULT_MONGO_TIMEOUT_MS),
 });
+
+/**
+ * The slice of `AppConfig` this adapter reads, declared here because the
+ * fragment is only part of `AppConfig` while `@module:db-mongo` is active.
+ */
+export type MongoConfig = z.infer<typeof mongoEnvFragment>;

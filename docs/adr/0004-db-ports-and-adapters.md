@@ -48,4 +48,5 @@ become uniform HTTP envelopes (FR-3.2), and every adapter must behave the same
 
 - Swapping the engine is an adapter swap plus the contract suite, not a feature rewrite.
 - Adapters carry translation code (filters, sort, errors) that must stay in sync with the contract suite.
+- The Postgres adapter chose Drizzle; see [ADR-0005](./0005-drizzle-postgres-adapter.md).
 - Fixed-interval reconnect (`ponytail:` note): add backoff/jitter if many instances start together.

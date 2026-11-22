@@ -12,6 +12,7 @@ import { APP_CONFIG, type AppConfig } from '../../../config/app-config';
 import { DATABASE_CONNECTION_NAME, DATABASE_HEALTH } from '../core/tokens';
 import { MongoHealthIndicator } from './mongo-health.indicator';
 import { DEFAULT_MONGO_URI, MONGO_CONNECTION, MONGO_RUNTIME } from './mongo.constants';
+import type { MongoConfig } from './mongo.env';
 import type { MongoRuntime } from './mongo.types';
 
 // sanitizeFilter is global: every query filter is scrubbed of user-supplied
@@ -51,7 +52,10 @@ function createRuntime(connection: Connection): MongoRuntime {
  * (no URI) and retries after `MONGO_TIMEOUT_MS` until connected or destroyed.
  * The app boots and `/health/live` works even when Mongo is down (AC-M04.5).
  */
-function startConnection(config: AppConfig, logger: Pick<Logger, 'warn'>): MongoRuntime {
+function startConnection(
+  config: MongoConfig & Pick<AppConfig, 'NODE_ENV'>,
+  logger: Pick<Logger, 'warn'>,
+): MongoRuntime {
   const connection = mongoose.createConnection();
   const runtime = createRuntime(connection);
   const timeoutMs = config.MONGO_TIMEOUT_MS;
@@ -101,8 +105,10 @@ export class MongoDatabaseModule {
         {
           provide: MONGO_RUNTIME,
           inject: [APP_CONFIG, Logger],
-          useFactory: (config: AppConfig, logger: Pick<Logger, 'warn'>): MongoRuntime =>
-            startConnection(config, logger),
+          useFactory: (
+            config: MongoConfig & Pick<AppConfig, 'NODE_ENV'>,
+            logger: Pick<Logger, 'warn'>,
+          ): MongoRuntime => startConnection(config, logger),
         },
         {
           provide: MONGO_CONNECTION,

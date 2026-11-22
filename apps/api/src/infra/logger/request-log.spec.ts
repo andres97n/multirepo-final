@@ -12,7 +12,8 @@ import { buildPinoHttpOptions } from './logger.module';
 @Module({})
 class EmptyModule {}
 
-const config: AppConfig = {
+// Core fields only: module fragments (db-*) are optional per build.
+const config = {
   NODE_ENV: 'production',
   PORT: 3001,
   TRUST_PROXY: 0,
@@ -21,9 +22,7 @@ const config: AppConfig = {
   THROTTLE_LIMIT: 100,
   LOG_LEVEL: 'info',
   API_DOCS_ENABLED: false,
-  MONGO_URI: 'mongodb://localhost:27017/app',
-  MONGO_TIMEOUT_MS: 3000,
-};
+} as AppConfig;
 
 describe('request id in the log line (AC-M03.5)', () => {
   it('logs the response-header requestId (even for an invalid incoming id) and a query-free url', async () => {

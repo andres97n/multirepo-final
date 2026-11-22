@@ -10,18 +10,18 @@ const MARKER_FILES = [
   '../../compose.dev.yaml',
 ];
 
-const BEGIN = '@module:db-mongo';
-const END = '@end-module:db-mongo';
-
 /**
- * AC-M04.12: every file needed to remove the adapter carries balanced
- * `@module:db-mongo` regions (import, wiring, env docs, compose service).
+ * AC-M04.12 / AC-M05.10: every file needed to remove or swap an adapter
+ * carries balanced `@module:db-*` regions (import, wiring, env docs, compose).
  */
-describe('db-mongo module markers (AC-M04.12)', () => {
-  it.each(MARKER_FILES)('%s has balanced @module:db-mongo regions', (file) => {
+describe.each(['db-mongo', 'db-postgres'])('%s module markers', (name) => {
+  const BEGIN = `@module:${name}`;
+  const END = `@end-module:${name}`;
+
+  it.each(MARKER_FILES)('%s has balanced regions', (file) => {
     const content = readFileSync(path.join(process.cwd(), file), 'utf8');
     // The longer token must come first so `@end-module` is not counted as a begin.
-    const tokens = content.match(/@end-module:db-mongo|@module:db-mongo/g) ?? [];
+    const tokens = content.match(new RegExp(`${END}|${BEGIN}`, 'g')) ?? [];
 
     const begins = tokens.filter((token) => token === BEGIN);
     const ends = tokens.filter((token) => token === END);

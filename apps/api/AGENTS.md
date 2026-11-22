@@ -29,6 +29,11 @@ logs, baseline security middleware and the database ports + Mongo adapter.
   health indicator, `db:sync-indexes`. The only place `mongoose` may be imported.
   Constants live in `mongo.constants.ts`, types in `mongo.types.ts`, driver-error
   mapping in `mongo-error.mapper.ts`; `MONGO_URI` is required in production.
+- `src/infra/database/postgres/` — `@module:db-postgres` (present, **not wired** by
+  default): `PostgresDatabaseModule.forRoot()` (`DATABASE_URL`, `POSTGRES_*`),
+  `PostgresRepository`, `PostgresQueryTranslator`, health indicator, `schema/`
+  (`baseColumns`), `drizzle.config.ts` + `migrations/`. The only place `drizzle-orm`,
+  `pg` and `@electric-sql/pglite` may be imported. See ADR-0005.
 - `test/` — e2e specs (supertest); `test/helpers.ts` builds the app.
 
 ## How to add a config fragment
@@ -54,6 +59,30 @@ logs, baseline security middleware and the database ports + Mongo adapter.
   `runRepositoryContract` against it in a spec. Non-whitelisted filter/sort fields are 400.
 - `autoIndex` is off in production: run `pnpm --filter api db:sync-indexes` on deploy.
 - Local Mongo: `pnpm dev:db` (compose.dev.yaml). Tests use mongodb-memory-server.
+- Postgres repositories: extend `PostgresRepository(db, table, fields)` with a table that
+  spreads `baseColumns`; name unique constraints `<table>_<column>_unique` so conflicts
+  report the field. Tests run the contract on PGlite (`testing/pglite.ts`).
+- Postgres migrations are explicit: edit `src/infra/database/postgres/schema/`, then
+  `pnpm --filter api db:generate` and `pnpm --filter api db:migrate` (never on boot).
+  Local Postgres: `docker compose -f compose.dev.yaml up -d --wait postgres`; the app
+  connects as the non-superuser `app` role (`docker/postgres/init/01-app-role.sql`).
+
+## Switching database engine
+
+Exactly one engine is wired per app. To switch Mongo → Postgres, touch only the
+`@module:db-*` regions plus `.env`:
+
+1. In `src/app.module.ts`, `src/config/env.schema.ts` (three regions) comment out the
+   `db-mongo` regions and uncomment the `db-postgres` ones.
+2. In `.env`, drop `MONGO_*` and set `DATABASE_URL` (see the `db-postgres` block of
+   `.env.example`); `DATABASE_URL` is required in production.
+3. Start Postgres (`docker compose -f compose.dev.yaml up -d --wait postgres`) and run
+   `pnpm --filter api db:migrate`.
+4. Feature repositories extend `PostgresRepository` instead of `MongoRepository`; the
+   ports and the contract suite do not change. Mongo-specific specs (e.g. the
+   `MONGO_URI` env tests) only apply while `db-mongo` is wired.
+
+The scaffold script (M11) automates this. Running both engines at once needs an ADR.
 
 ## Rules
 

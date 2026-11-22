@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] - 2026-11-22
+
+### Added
+
+- **feat(api): add Postgres adapter on Drizzle (M05)**
+  - `infra/database/postgres` (`@module:db-postgres`, present but not wired by default): `PostgresDatabaseModule.forRoot()` (lazy `pg.Pool`, env-driven pool/timeouts, graceful `pool.end()`), `PostgresRepository` on Drizzle (uuid v7 ids, `created_at`/`updated_at`), `PostgresQueryTranslator`, `select 1` health indicator and SQLSTATE `23505` → `ConflictError(field)` from `<table>_<column>_unique`.
+  - The unmodified M04 repository contract suite passes on PGlite; new specs for the mapper, translator, health, module and a no-`sql.raw` guard.
+  - `drizzle.config.ts`, `migrations/`, `db:generate` / `db:migrate` (migrations never run on boot).
+  - `compose.dev.yaml` Postgres service (healthcheck, named volume) and a non-superuser `app` role (`docker/postgres/init`).
+  - ADR-0005; "Switching database engine" section in `apps/api/AGENTS.md`.
+
+### Security
+
+- `contains` escapes `%`, `_` and `\`; filter values are bound parameters coerced to the column type; ESLint keeps `drizzle-orm`/`pg`/`@electric-sql/pglite` inside the adapter and Mongo drivers out of it.
+
+### Changed
+
+- The Mongo adapter and the config-fixture specs no longer depend on `AppConfig` carrying `MONGO_*`, so either engine's regions can be switched off; `db-mongo.markers.spec.ts` now checks both modules.
+
 ## [0.3.0] - 2026-11-22
 
 ### Added

@@ -2,7 +2,7 @@
 
 | Field      | Value                                          |
 | ---------- | ---------------------------------------------- |
-| Status     | Not started                                    |
+| Status     | In review (live compose checks pending)        |
 | Depends on | [M04](./M04-db-core-mongo.md)                  |
 | PRD refs   | FR-3.1, FR-3.2, FR-3.3, FR-3.4, FR-4.1 (ready) |
 | Axes       | 1 (Modular), 5 (Security), 6 (Infra)           |
@@ -21,15 +21,15 @@ An optional PostgreSQL adapter built on Drizzle. It is interchangeable with Mong
 
 ## Tasks
 
-- [ ] `PostgresDatabaseModule.forRoot()`: node-postgres `Pool` from `DATABASE_URL`, pool size/timeouts from env, graceful pool shutdown.
-- [ ] `PostgresRepository<T>` base on Drizzle: `id` uuid v7 (generated app-side), `created_at/updated_at` columns, `23505` → `ConflictError(field)` (parsed from constraint name), invalid uuid → `NotFoundError`.
-- [ ] Filter translation through Drizzle operators only (`eq, ne, inArray, gt, gte, lt, lte, ilike` with escaped `%`/`_`). Never raw SQL with user input.
-- [ ] `drizzle.config.ts`, `migrations/`, and scripts `db:generate` and `db:migrate`. Migrations never run on app boot.
-- [ ] Health indicator: `select 1` with a timeout.
-- [ ] Contract suite runs on PGlite (in-process). Schema for the test-only `Widget` table is pushed per test file.
-- [ ] compose.dev `postgres` service with healthcheck and named volume.
-- [ ] `// @module:db-postgres` markers in `app.module.ts`, env schema, `.env.example` and compose.
-- [ ] Decide and document: the default base repo has mongo **active** and postgres **present but not wired**. The scaffold script (M11) swaps them.
+- [x] `PostgresDatabaseModule.forRoot()`: node-postgres `Pool` from `DATABASE_URL`, pool size/timeouts from env, graceful pool shutdown.
+- [x] `PostgresRepository<T>` base on Drizzle: `id` uuid v7 (generated app-side), `created_at/updated_at` columns, `23505` → `ConflictError(field)` (parsed from constraint name), invalid uuid → `NotFoundError`.
+- [x] Filter translation through Drizzle operators only (`eq, ne, inArray, gt, gte, lt, lte, ilike` with escaped `%`/`_`). Never raw SQL with user input.
+- [x] `drizzle.config.ts`, `migrations/`, and scripts `db:generate` and `db:migrate`. Migrations never run on app boot.
+- [x] Health indicator: `select 1` with a timeout.
+- [x] Contract suite runs on PGlite (in-process). Schema for the test-only `Widget` table is pushed per test file.
+- [x] compose.dev `postgres` service with healthcheck and named volume.
+- [x] `// @module:db-postgres` markers in `app.module.ts`, env schema, `.env.example` and compose.
+- [x] Decide and document: the default base repo has mongo **active** and postgres **present but not wired**. The scaffold script (M11) swaps them.
 
 ## Deliverables
 

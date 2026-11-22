@@ -7,7 +7,8 @@ import { describe, expect, it } from 'vitest';
 import type { AppConfig } from '../../config/env.schema';
 import { buildPinoHttpOptions, redactConfig } from './logger.module';
 
-const baseConfig: AppConfig = {
+// Core fields only: module fragments (db-*) are optional per build.
+const baseConfig = {
   NODE_ENV: 'production',
   PORT: 3001,
   TRUST_PROXY: 0,
@@ -16,9 +17,7 @@ const baseConfig: AppConfig = {
   THROTTLE_LIMIT: 100,
   LOG_LEVEL: 'info',
   API_DOCS_ENABLED: false,
-  MONGO_URI: 'mongodb://localhost:27017/app',
-  MONGO_TIMEOUT_MS: 3000,
-};
+} as AppConfig;
 
 function capture(): { stream: Writable; lines: string[] } {
   const lines: string[] = [];
