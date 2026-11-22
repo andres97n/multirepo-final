@@ -6,6 +6,9 @@ All notable changes to this project are documented here. Format based on [Keep a
 
 ### Added
 
+- **18:09 — `d747250` docs: add full project context to AGENTS.md and CLAUDE.md import**
+  - Root `AGENTS.md` summarizes the target project (M00–M16): architecture, structure, stack, modules, rules, workflow and progress.
+  - `CLAUDE.md` imports `AGENTS.md`, which stays canonical.
 - **feat(api): add Postgres adapter on Drizzle (M05)**
   - `infra/database/postgres` (`@module:db-postgres`, present but not wired by default): `PostgresDatabaseModule.forRoot()` (lazy `pg.Pool`, env-driven pool/timeouts, graceful `pool.end()`), `PostgresRepository` on Drizzle (uuid v7 ids, `created_at`/`updated_at`), `PostgresQueryTranslator`, `select 1` health indicator and SQLSTATE `23505` → `ConflictError(field)` from `<table>_<column>_unique`.
   - The unmodified M04 repository contract suite passes on PGlite; new specs for the mapper, translator, health, module and a no-`sql.raw` guard.
