@@ -2,6 +2,29 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - 2026-11-22
+
+### Added
+
+- **15:00 — `66437b3`, `e12e70d`, `d1005d5` feat(api): add db-core ports and Mongo adapter (M04)**
+  - `infra/database/core`: `Repository`/`QueryTranslator`/`DatabaseHealth` ports, `DbError` family and a reusable repository contract suite.
+  - `infra/database/mongo` (`@module:db-mongo`): Mongoose adapter with whitelisted filter/sort translation, regex escaping, `sanitizeFilter`, E11000 → `ConflictError`, background connect, health ping and `db:sync-indexes`.
+  - `GET /api/v1/health/ready` (200 ok / 503 down); `/health/live` stays process-only.
+  - `SERVICE_UNAVAILABLE` error code; `AllExceptionsFilter` maps `DbError`s (404, 409 with `details.field`, 400, 503).
+  - `compose.dev.yaml` Mongo service and `pnpm dev:db`; `MONGO_URI`/`MONGO_TIMEOUT_MS` env.
+  - ESLint `no-restricted-imports` keeps `mongoose`/`mongodb` inside the adapter; coverage gate ≥ 85% on `infra/database/**`.
+  - ADR-0004 (DB behind ports; one primary engine per app).
+
+### Security
+
+- Bad client input can no longer cause a 500: Mongoose cast/validation errors map to 400 `VALIDATION_FAILED`, and object values for `eq`/`ne` are rejected by the translator.
+- `MONGO_URI` is required in production (`.meta({ requiredInProduction: true })` is honoured by `composeEnvSchema`); `id`/`_id`/`$` keys are rejected on `create`/`update`.
+
+### Changed
+
+- Constants, types and the health interface live in their own files (`core/constants.ts`, `core/health.ts`, `mongo/mongo.constants.ts`, `mongo/mongo.types.ts`); driver-error mapping moved to `mongo/mongo-error.mapper.ts`.
+- `compose.dev.yaml` host port is overridable with `MONGO_PORT`; `sync-indexes` awaits the connection first.
+
 ## [0.2.1] - 2026-11-15
 
 ### Fixed
