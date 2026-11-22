@@ -12,6 +12,7 @@
   },
   "scripts": {
     "dev": "turbo run dev",
+    "dev:db": "docker compose -f compose.dev.yaml up -d --wait mongo",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",

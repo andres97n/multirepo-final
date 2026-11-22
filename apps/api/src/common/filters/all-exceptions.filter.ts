@@ -12,6 +12,7 @@ import { Logger } from 'nestjs-pino';
 import { ZodValidationException } from 'nestjs-zod';
 import { ZodError } from 'zod';
 import { APP_CONFIG, type AppConfig } from '../../config/app-config';
+import { DbError, mapDbError } from '../../infra/database/core';
 import { getRequestId } from '../request-context';
 import { generateRequestId } from '../request-id';
 
@@ -22,6 +23,7 @@ const STATUS_TO_CODE: Readonly<Record<number, ErrorCode>> = {
   [HttpStatus.NOT_FOUND]: ErrorCodes.NOT_FOUND,
   [HttpStatus.CONFLICT]: ErrorCodes.CONFLICT,
   [HttpStatus.TOO_MANY_REQUESTS]: ErrorCodes.RATE_LIMITED,
+  [HttpStatus.SERVICE_UNAVAILABLE]: ErrorCodes.SERVICE_UNAVAILABLE,
 };
 
 export function httpStatusToErrorCode(status: number): ErrorCode {
@@ -67,7 +69,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     let status: number;
     let code: ErrorCode;
     let message: string;
-    let details: Array<{ path: string; message: string }> | undefined;
+    let details: unknown;
 
     const zodError = toZodError(exception);
     if (zodError) {
@@ -75,6 +77,21 @@ export class AllExceptionsFilter implements ExceptionFilter {
       code = ErrorCodes.VALIDATION_FAILED;
       message = 'Validation failed';
       details = zodIssuesToDetails(zodError);
+    } else if (exception instanceof DbError) {
+      const mapped = mapDbError(exception);
+      status = mapped?.status ?? HttpStatus.INTERNAL_SERVER_ERROR;
+      code = mapped?.code ?? ErrorCodes.INTERNAL;
+      const isServerError = status >= 500;
+      message =
+        isServerError && this.config.NODE_ENV === 'production'
+          ? 'Internal server error'
+          : (mapped?.message ?? exception.message);
+      if (mapped?.details !== undefined) {
+        details = mapped.details;
+      }
+      if (isServerError) {
+        this.logger.error({ err: exception, requestId }, 'DbError 5xx');
+      }
     } else if (exception instanceof HttpException) {
       status = exception.getStatus();
       code = httpStatusToErrorCode(status);

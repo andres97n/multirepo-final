@@ -21,6 +21,8 @@ const config: AppConfig = {
   THROTTLE_LIMIT: 100,
   LOG_LEVEL: 'info',
   API_DOCS_ENABLED: false,
+  MONGO_URI: 'mongodb://localhost:27017/app',
+  MONGO_TIMEOUT_MS: 3000,
 };
 
 describe('request id in the log line (AC-M03.5)', () => {

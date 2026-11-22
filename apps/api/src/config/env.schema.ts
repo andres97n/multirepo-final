@@ -1,4 +1,7 @@
 import { z } from 'zod';
+// @module:db-mongo
+import { mongoEnvFragment } from '../infra/database/mongo/mongo.env';
+// @end-module:db-mongo
 
 const boolFromString = z.enum(['true', 'false']).transform((value) => value === 'true');
 
@@ -40,7 +43,8 @@ function looksLikeExampleSecret(value: string): boolean {
 /**
  * Merges the given fragments and applies the production-only superRefine:
  * - `CORS_ORIGIN` must not contain `*`;
- * - every `*_SECRET` value must be >= 32 bytes and must not be an example/low-entropy value.
+ * - every `*_SECRET` value must be >= 32 bytes and must not be an example/low-entropy value;
+ * - every field tagged `.meta({ requiredInProduction: true })` must be set.
  */
 export function composeEnvSchema(...fragments: EnvFragment[]) {
   const shape = fragments.reduce<z.ZodRawShape>(
@@ -60,6 +64,15 @@ export function composeEnvSchema(...fragments: EnvFragment[]) {
         path: ['CORS_ORIGIN'],
         message: 'CORS_ORIGIN must not contain "*" or "null" in production',
       });
+    }
+    for (const [key, field] of Object.entries(shape)) {
+      if ((field as z.ZodType).meta()?.requiredInProduction === true && env[key] === undefined) {
+        ctx.addIssue({
+          code: 'custom',
+          path: [key],
+          message: `${key} is required in production`,
+        });
+      }
     }
     for (const [key, value] of Object.entries(env)) {
       if (!key.endsWith('_SECRET') || typeof value !== 'string') {
@@ -82,11 +95,22 @@ export function composeEnvSchema(...fragments: EnvFragment[]) {
   });
 }
 
-export const envSchema = composeEnvSchema(coreEnvFragment);
+export const envSchema = composeEnvSchema(
+  coreEnvFragment,
+  // @module:db-mongo
+  mongoEnvFragment,
+  // @end-module:db-mongo
+);
 
 /**
- * The core config shape. `composeEnvSchema` returns a loosely-typed schema on
- * purpose (it merges arbitrary fragments), so the precise type is derived from
- * the core fragment here; M04/M06 widen it as they add fragments.
+ * The core config shape plus the active module fragments. `composeEnvSchema`
+ * returns a loosely-typed schema on purpose (it merges arbitrary fragments),
+ * so precise types are derived here; each module widens `ModuleEnv` with its
+ * own fragment inside its marker region.
  */
-export type AppConfig = z.infer<typeof coreEnvFragment>;
+type ModuleEnv =
+  // @module:db-mongo
+  z.infer<typeof mongoEnvFragment> &
+    // @end-module:db-mongo
+    Record<never, never>;
+export type AppConfig = z.infer<typeof coreEnvFragment> & ModuleEnv;

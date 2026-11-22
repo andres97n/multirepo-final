@@ -1,0 +1,19 @@
+services:
+  # @module:db-mongo
+  mongo:
+    image: mongo:8.0
+    ports:
+      - '127.0.0.1:${MONGO_PORT:-27017}:27017'
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+  # @end-module:db-mongo
+volumes:
+  # @module:db-mongo
+  mongo-data:
+  # @end-module:db-mongo

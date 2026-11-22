@@ -9,4 +9,28 @@ export default [
       '@typescript-eslint/no-extraneous-class': ['error', { allowWithDecorator: true }],
     },
   },
+  {
+    // AC-M04.9: drivers may only be imported inside the mongo adapter.
+    files: ['src/**/*.ts', 'test/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['mongoose', 'mongoose/*', 'mongodb', 'mongodb/*'],
+              message:
+                'Import database ports from src/infra/database/core instead of the driver (AC-M04.9).',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/infra/database/mongo/**/*.ts'],
+    rules: {
+      'no-restricted-imports': 'off',
+    },
+  },
 ];

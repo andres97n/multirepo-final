@@ -16,6 +16,8 @@ const baseConfig: AppConfig = {
   THROTTLE_LIMIT: 100,
   LOG_LEVEL: 'info',
   API_DOCS_ENABLED: false,
+  MONGO_URI: 'mongodb://localhost:27017/app',
+  MONGO_TIMEOUT_MS: 3000,
 };
 
 function capture(): { stream: Writable; lines: string[] } {

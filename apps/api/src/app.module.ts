@@ -5,6 +5,9 @@ import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { APP_CONFIG, type AppConfig } from './config/app-config';
 import { ConfigModule } from './config/config.module';
+// @module:db-mongo
+import { MongoDatabaseModule } from './infra/database/mongo';
+// @end-module:db-mongo
 import { HealthModule } from './infra/health/health.module';
 import { LoggerModule } from './infra/logger/logger.module';
 
@@ -12,6 +15,9 @@ import { LoggerModule } from './infra/logger/logger.module';
   imports: [
     ConfigModule,
     LoggerModule,
+    // @module:db-mongo
+    MongoDatabaseModule.forRoot(),
+    // @end-module:db-mongo
     HealthModule,
     ThrottlerModule.forRootAsync({
       inject: [APP_CONFIG],

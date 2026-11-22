@@ -59,6 +59,19 @@ describe('env schema', () => {
     expect(result.success).toBe(false);
   });
 
+  it('requires MONGO_URI in production but not in development', () => {
+    const prod = { NODE_ENV: 'production', CORS_ORIGIN: 'https://example.com' };
+    const missing = envSchema.safeParse(prod);
+    expect(missing.success).toBe(false);
+    if (!missing.success) {
+      expect(missing.error.issues.map((issue) => issue.path.join('.'))).toContain('MONGO_URI');
+    }
+    expect(envSchema.safeParse({ ...prod, MONGO_URI: 'mongodb://db:27017/app' }).success).toBe(
+      true,
+    );
+    expect(envSchema.safeParse({ NODE_ENV: 'development' }).success).toBe(true);
+  });
+
   it('accepts a valid secret in production', () => {
     const schema = composeEnvSchema(coreEnvFragment, z.object({ MY_SECRET: z.string() }));
     const result = schema.safeParse({

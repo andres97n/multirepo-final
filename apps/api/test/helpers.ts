@@ -1,6 +1,6 @@
 import type { Type } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import { Test } from '@nestjs/testing';
+import { Test, type TestingModuleBuilder } from '@nestjs/testing';
 import type { ErrorEnvelope } from '@repo/contracts';
 import { AppModule } from '../src/app.module';
 import { configureApp } from '../src/configure-app';
@@ -10,12 +10,23 @@ export function asErrorEnvelope(body: unknown): ErrorEnvelope {
   return body as ErrorEnvelope;
 }
 
-/** Builds a fully-wired app (same wiring as main.ts) for supertest. */
-export async function buildApp(controllers: Type<unknown>[] = []): Promise<NestExpressApplication> {
-  const moduleRef = await Test.createTestingModule({
+/**
+ * Builds a fully-wired app (same wiring as main.ts) for supertest. `configure`
+ * can tweak the testing module (e.g. `overrideProvider(DATABASE_HEALTH)`)
+ * before compilation; by default the app is built unchanged.
+ */
+export async function buildApp(
+  controllers: Type<unknown>[] = [],
+  configure?: (builder: TestingModuleBuilder) => TestingModuleBuilder,
+): Promise<NestExpressApplication> {
+  let builder = Test.createTestingModule({
     imports: [AppModule],
     controllers,
-  }).compile();
+  });
+  if (configure) {
+    builder = configure(builder);
+  }
+  const moduleRef = await builder.compile();
   const app = moduleRef.createNestApplication<NestExpressApplication>();
   configureApp(app);
   await app.init();
