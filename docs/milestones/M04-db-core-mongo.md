@@ -2,7 +2,7 @@
 
 | Field      | Value                                                       |
 | ---------- | ----------------------------------------------------------- |
-| Status     | Not started                                                 |
+| Status     | Done                                                        |
 | Depends on | [M03](./M03-api-core.md)                                    |
 | PRD refs   | FR-3.1, FR-3.2, FR-3.3, FR-4.1 (ready), NFR-SEC-7, NFR-DX-1 |
 | Axes       | 1 (Modular), 5 (Security), 7 (Observability)                |
@@ -21,25 +21,25 @@ Feature code depends only on database ports. MongoDB (Mongoose) is the default a
 
 ## Tasks
 
-- [ ] `core/`:
+- [x] `core/`:
   - `Repository<T, Id = string>` port: `findById`, `findOne(filter)`, `findMany(PageQuery, FilterSpec) → Paginated<T>`, `create`, `update(id, patch)`, `delete(id)`, `exists`.
   - `DbError` base + `NotFoundError`, `ConflictError(field?)`, `DbUnavailableError`.
   - DI tokens: `DATABASE_HEALTH`, `DATABASE_CONNECTION_NAME`.
   - Sort/filter translation interface that each adapter implements.
-- [ ] Global filter mapping: NotFound → 404 `NOT_FOUND`, Conflict → 409 `CONFLICT`, DbUnavailable → 503.
-- [ ] **Repository contract test suite** `core/testing/repository.contract.ts`:
+- [x] Global filter mapping: NotFound → 404 `NOT_FOUND`, Conflict → 409 `CONFLICT`, DbUnavailable → 503.
+- [x] **Repository contract test suite** `core/testing/repository.contract.ts`:
   - Parameterized over `makeRepo()`; uses a sample `Widget` entity defined only in tests.
   - Covers CRUD, pagination bounds, sort, filter ops, unique conflict, not-found.
-- [ ] `mongo/`:
+- [x] `mongo/`:
   - `MongoDatabaseModule.forRoot()` reads `MONGO_URI`, with connection timeouts and `autoIndex` off in production (indexes synced by an explicit `db:sync-indexes` script).
   - `MongoRepository<T>` base: `_id` → `id`, `toJSON` strips `__v`, `lean()` reads.
   - E11000 → `ConflictError` with field.
   - Filter translation uses only whitelisted operators (`eq, ne, in, gt, gte, lt, lte, contains`). `contains` escapes the regex. `$where`/`$expr` and user-supplied `$` keys are never passed through.
   - `sanitizeFilter` enabled globally.
   - Health indicator: `db.admin().ping()` with a timeout.
-- [ ] `GET /api/v1/health/ready`: aggregates `DATABASE_HEALTH` → 200 ok / 503 down.
-- [ ] `compose.dev.yaml` mongo service with healthcheck and named volume.
-- [ ] `// @module:db-mongo` … `// @end-module:db-mongo` markers in `app.module.ts`, env schema and `.env.example`.
+- [x] `GET /api/v1/health/ready`: aggregates `DATABASE_HEALTH` → 200 ok / 503 down.
+- [x] `compose.dev.yaml` mongo service with healthcheck and named volume.
+- [x] `// @module:db-mongo` … `// @end-module:db-mongo` markers in `app.module.ts`, env schema and `.env.example`.
 
 ## Deliverables
 

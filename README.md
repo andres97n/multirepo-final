@@ -7,6 +7,7 @@ NestJS + Next.js + TypeScript monorepo boilerplate. See [docs/prd.md](docs/prd.m
 ```bash
 pnpm install
 pnpm lint && pnpm typecheck
+pnpm dev:db   # MongoDB for local dev (compose.dev.yaml)
 ```
 
 (Full quick start arrives with M15.)

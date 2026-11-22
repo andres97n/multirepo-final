@@ -1,8 +1,8 @@
 # apps/api
 
-NestJS 11 / Express 5 API. No database and no auth yet; it owns validated
-config, contract-based validation, a uniform error envelope, request ids,
-redacted pino logs and baseline security middleware.
+NestJS 11 / Express 5 API. No auth yet; it owns validated config,
+contract-based validation, a uniform error envelope, request ids, redacted pino
+logs, baseline security middleware and the database ports + Mongo adapter.
 
 ## Folder roles
 
@@ -19,7 +19,16 @@ redacted pino logs and baseline security middleware.
 - `src/common/` — `filters/` (error envelope), `middleware/` (request id),
   `request-id.ts` and `request-context.ts` (AsyncLocalStorage).
 - `src/infra/logger/` — nestjs-pino options (redaction, serializers).
-- `src/infra/health/` — `GET /api/v1/health/live` (readiness arrives in M04).
+- `src/infra/health/` — `GET /api/v1/health/live` (process only) and
+  `GET /api/v1/health/ready` (aggregates `DATABASE_HEALTH`: 200 ok / 503 down).
+- `src/infra/database/core/` — ports (`Repository`, `QueryTranslator`,
+  `DatabaseHealth`), `DbError`s and the reusable contract suite
+  (`testing/repository.contract.ts`). No driver imports allowed here.
+- `src/infra/database/mongo/` — `@module:db-mongo`: `MongoDatabaseModule.forRoot()`
+  (`MONGO_URI`, `MONGO_TIMEOUT_MS`), `MongoRepository`, `MongoQueryTranslator`,
+  health indicator, `db:sync-indexes`. The only place `mongoose` may be imported.
+  Constants live in `mongo.constants.ts`, types in `mongo.types.ts`, driver-error
+  mapping in `mongo-error.mapper.ts`; `MONGO_URI` is required in production.
 - `test/` — e2e specs (supertest); `test/helpers.ts` builds the app.
 
 ## How to add a config fragment
@@ -37,6 +46,14 @@ redacted pino logs and baseline security middleware.
    and annotate the endpoint with `@ZodResponse(...)`. The global
    `ZodValidationPipe` validates any `@Body()/@Query()/@Param()` typed with a
    Zod DTO, and `@ZodResponse` drives response serialization + OpenAPI.
+
+## Database rules
+
+- Features depend on `infra/database/core` ports only; throw/catch `DbError`s, never driver errors.
+- New repository: extend `MongoRepository`, pass its field whitelist, and run
+  `runRepositoryContract` against it in a spec. Non-whitelisted filter/sort fields are 400.
+- `autoIndex` is off in production: run `pnpm --filter api db:sync-indexes` on deploy.
+- Local Mongo: `pnpm dev:db` (compose.dev.yaml). Tests use mongodb-memory-server.
 
 ## Rules
 
