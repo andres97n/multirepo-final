@@ -9,6 +9,7 @@ describe('ErrorCode', () => {
     'NOT_FOUND',
     'CONFLICT',
     'RATE_LIMITED',
+    'SERVICE_UNAVAILABLE',
     'INTERNAL',
   ])('accepts %s', (code) => {
     expect(ErrorCode.parse(code)).toBe(code);
@@ -28,6 +29,7 @@ describe('ErrorCodes', () => {
       NOT_FOUND: 'NOT_FOUND',
       CONFLICT: 'CONFLICT',
       RATE_LIMITED: 'RATE_LIMITED',
+      SERVICE_UNAVAILABLE: 'SERVICE_UNAVAILABLE',
       INTERNAL: 'INTERNAL',
     });
   });
