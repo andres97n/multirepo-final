@@ -2,7 +2,7 @@
 
 | Field      | Value                                                               |
 | ---------- | ------------------------------------------------------------------- |
-| Status     | Not started                                                         |
+| Status     | Done                                                                |
 | Depends on | [M04](./M04-db-core-mongo.md), [M05](./M05-db-postgres.md)          |
 | PRD refs   | FR-2.1–FR-2.7, FR-2.9, FR-3.1, FR-3.3, FR-4.2, NFR-SEC-1, NFR-SEC-7 |
 | Axes       | 1 (Modular), 2 (Contracts), 5 (Security)                            |
@@ -21,37 +21,37 @@ A removable `auth` module providing local email and password login. It uses Argo
 
 ## Tasks
 
-- [ ] Ports:
+- [x] Ports:
   - `UsersRepository` (`findByEmail`, `create`, `recordFailedLogin`, `resetFailedLogins`, `list(PageQuery, FilterSpec)`).
   - `SessionsRepository` (`create`, `findByTokenHash`, `rotate`, `revoke`, `revokeFamily`, `revokeAllForUser`, `deleteExpired`).
-- [ ] Mongo and Postgres implementations of both, with indexes and constraints (unique email, unique tokenHash, index on userId and familyId). Each implementation extends the M04 contract suite with auth-specific cases.
-- [ ] `PasswordService`:
+- [x] Mongo and Postgres implementations of both, with indexes and constraints (unique email, unique tokenHash, index on userId and familyId). Each implementation extends the M04 contract suite with auth-specific cases.
+- [x] `PasswordService`:
   - Argon2id with params from env (memoryCost, timeCost, parallelism; defaults per OWASP), `needsRehash` on login.
   - Dummy-hash verification for unknown users so timing is the same.
-- [ ] `TokenService`:
+- [x] `TokenService`:
   - Access JWT HS256 (`sub`, `roles`, `sid`, `iat`, `exp`; TTL from env, default 15 min; `iss`/`aud` checked).
   - Refresh token: 32 random bytes, base64url, sha256 hash stored.
-- [ ] `AuthService`:
+- [x] `AuthService`:
   - `login` (status check, lockout check, verify, create session family).
   - `refresh` (find by hash → if revoked, revoke the family and return 401 → else rotate with sliding expiry capped by `familyExpiresAt`).
   - `logout` (revoke the current session), `me`.
-- [ ] Lockout:
+- [x] Lockout:
   - `failedLoginCount` ≥ N (env, default 5) → `lockedUntil = now + base * 2^(count-N)`, capped (default 60 s base, 15 min cap).
   - Reset on success. Never permanent.
-- [ ] Per-IP throttle on `POST /auth/login` (stricter named throttler, from env).
-- [ ] `JwtAuthGuard`:
+- [x] Per-IP throttle on `POST /auth/login` (stricter named throttler, from env).
+- [x] `JwtAuthGuard`:
   - Global, inside `@module:auth`.
   - Validates the JWT, then checks that the session `sid` is not revoked (via the repository, with a short in-process cache: `ponytail:` per-instance cache, Redis when horizontal).
   - `@Public()` opts out.
-- [ ] `RolesGuard` + `@Roles(...)`. Health endpoints are marked `@Public()`.
-- [ ] Endpoints (bodies validated by contracts):
+- [x] `RolesGuard` + `@Roles(...)`. Health endpoints are marked `@Public()`.
+- [x] Endpoints (bodies validated by contracts):
   - `POST /api/v1/auth/login` → `{accessToken, refreshToken, expiresIn}`.
   - `POST /api/v1/auth/refresh`, `POST /api/v1/auth/logout`, `GET /api/v1/auth/me`.
   - `GET /api/v1/users` (admin; paginated + filtered: email contains, role eq, status eq).
-- [ ] `seed:admin` command (reads `SEED_ADMIN_EMAIL`/`SEED_ADMIN_PASSWORD` or prompts). Idempotent.
-- [ ] Session cleanup: `deleteExpired` scheduled through a simple interval or an explicit script (documented).
-- [ ] Env fragment `auth.env.ts`; `.env.example` entries inside markers.
-- [ ] Add `@module:auth` markers everywhere the module touches shared files.
+- [x] `seed:admin` command (reads `SEED_ADMIN_EMAIL`/`SEED_ADMIN_PASSWORD` or prompts). Idempotent.
+- [x] Session cleanup: `deleteExpired` scheduled through a simple interval or an explicit script (documented).
+- [x] Env fragment `auth.env.ts`; `.env.example` entries inside markers.
+- [x] Add `@module:auth` markers everywhere the module touches shared files.
 
 ## Deliverables
 

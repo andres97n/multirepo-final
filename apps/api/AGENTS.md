@@ -84,6 +84,22 @@ Exactly one engine is wired per app. To switch Mongo → Postgres, touch only th
 
 The scaffold script (M11) automates this. Running both engines at once needs an ADR.
 
+## Auth module
+
+`src/modules/auth/` (`@module:auth`, see ADR-0006). Local email + password login, Argon2id, 15-min HS256 access JWT, rotating refresh sessions with reuse detection, progressive lockout, RBAC (`user`, `admin`).
+
+- **Endpoints** (`/api/v1`): `POST auth/login`, `POST auth/refresh`, `POST auth/logout`, `GET auth/me`, `GET users` (admin; paginated, filters `email` contains, `role` eq, `status` eq).
+- **Protected by default.** A global `JwtAuthGuard` + `RolesGuard` guard every route.
+  - Public route: add `@Public()` from `src/common/public.decorator.ts` (method or class).
+  - Role-restricted route: add `@Roles('admin')` from `modules/auth/roles.decorator.ts`.
+  - Current user: `@CurrentUser()` gives `{ id, roles, sid }`.
+- **Repositories:** `UsersRepository` / `SessionsRepository` are abstract ports; Mongo and Postgres adapters live under `modules/auth/{mongo,postgres}` and bind via `mongoAuthProviders` / `postgresAuthProviders` inside the `@module:db-*` regions of `AuthModule`. Add new repository methods to both adapters and to `testing/auth-repositories.contract.ts`.
+- **Env** (`auth.env.ts`, block in `.env.example`): `JWT_ACCESS_SECRET` (required in production), `JWT_*`, `REFRESH_*`, `ARGON2_*`, `LOCKOUT_*`, `AUTH_REVOCATION_CACHE_TTL_SECONDS`, `LOGIN_THROTTLE_*`, `SESSION_CLEANUP_INTERVAL_MINUTES`.
+- **First admin:** `pnpm --filter api seed:admin` (reads `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` or prompts). Idempotent; never changes an existing password.
+- **Session cleanup:** an interval in `AuthModule` calls `deleteExpired`; run `deleteExpired` from a script if you disable it.
+- **Postgres:** `users`/`sessions` tables are in `schema/index.ts`; apply `migrations/` with `db:migrate`. Mongo: run `db:sync-indexes` on deploy.
+- **Tests:** `test/auth.e2e-spec.ts` (Mongo) and `test/auth-postgres.e2e-spec.ts` (PGlite) run the same suite `test/auth-suite.ts`. Never log passwords or tokens; log `userId` or a hashed email.
+
 ## Rules
 
 - No `any` in `src/` (`@typescript-eslint/no-explicit-any` is `error`).
