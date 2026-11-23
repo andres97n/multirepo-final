@@ -8,7 +8,12 @@ function hasHealthSchema(body: unknown): boolean {
   return Object.keys(schemas).some((key) => key.toLowerCase().includes('health'));
 }
 
-const production = { NODE_ENV: 'production', CORS_ORIGIN: 'https://example.com' };
+const production = {
+  NODE_ENV: 'production',
+  CORS_ORIGIN: 'https://example.com',
+  // The wired auth fragment requires a strong JWT secret in production.
+  JWT_ACCESS_SECRET: 'Zq8vK2mXr9LpT4wYc7NbH3sFj6DgA1eU',
+};
 
 describe('OpenAPI docs (AC-M03.7)', () => {
   it('serves the spec in development and contains the Health schema', async () => {

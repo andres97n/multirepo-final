@@ -1,6 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
+import { Public } from '../src/common/public.decorator';
 import {
   ConflictError,
   DbUnavailableError,
@@ -9,6 +10,7 @@ import {
 } from '../src/infra/database/core';
 import { asErrorEnvelope, buildApp } from './helpers';
 
+@Public()
 @Controller('db-errors-test')
 class DbErrorsTestController {
   @Get('not-found')

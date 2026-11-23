@@ -1,8 +1,10 @@
 import { Controller, Get } from '@nestjs/common';
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
+import { Public } from '../src/common/public.decorator';
 import { asErrorEnvelope, buildApp, withEnv } from './helpers';
 
+@Public()
 @Controller('test-only')
 class PingController {
   @Get('ping')
