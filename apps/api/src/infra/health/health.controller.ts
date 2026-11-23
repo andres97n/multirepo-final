@@ -4,12 +4,14 @@ import { SkipThrottle } from '@nestjs/throttler';
 import { Health } from '@repo/contracts';
 import type { Response } from 'express';
 import { createZodDto, ZodResponse } from 'nestjs-zod';
+import { Public } from '../../common/public.decorator';
 import { DATABASE_HEALTH, type DatabaseHealth } from '../database/core';
 
 class HealthDto extends createZodDto(Health) {}
 
 // Liveness/readiness probes (orchestrators, Docker HEALTHCHECK) are never rate limited.
 @SkipThrottle()
+@Public()
 @Controller('health')
 export class HealthController {
   constructor(@Optional() @Inject(DATABASE_HEALTH) private readonly database?: DatabaseHealth) {}

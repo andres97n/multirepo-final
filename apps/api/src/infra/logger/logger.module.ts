@@ -26,6 +26,11 @@ export const redactConfig = {
  * `stream` is only provided by tests that capture output to a destination;
  * the running app lets pino fall back to stdout (JSON) or pino-pretty (dev).
  */
+/** The guard-attached user the log serializer inspects. */
+interface MaybeAuthedRequest extends IncomingMessage {
+  user?: { id?: string };
+}
+
 export function buildPinoHttpOptions(config: AppConfig, stream?: DestinationStream): Options {
   const base: Options = {
     level: config.LOG_LEVEL,
@@ -41,7 +46,12 @@ export function buildPinoHttpOptions(config: AppConfig, stream?: DestinationStre
       }),
       res: (res: { statusCode?: number }) => ({ statusCode: res.statusCode }),
     },
-    customProps: (req: IncomingMessage) => ({ requestId: req.id }),
+    // `userId` appears once a guard has authenticated the request (AC-M06.15);
+    // anonymous requests carry no user field at all.
+    customProps: (req: IncomingMessage) => {
+      const userId = (req as MaybeAuthedRequest).user?.id;
+      return userId === undefined ? { requestId: req.id } : { requestId: req.id, userId };
+    },
   };
 
   if (config.NODE_ENV === 'development') {

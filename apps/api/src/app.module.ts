@@ -11,6 +11,11 @@ import { MongoDatabaseModule } from './infra/database/mongo';
 // @module:db-postgres
 // import { PostgresDatabaseModule } from './infra/database/postgres';
 // @end-module:db-postgres
+// @module:auth
+import type { ExecutionContext } from '@nestjs/common';
+import { AuthController } from './modules/auth/auth.controller';
+import { AuthModule } from './modules/auth/auth.module';
+// @end-module:auth
 import { HealthModule } from './infra/health/health.module';
 import { LoggerModule } from './infra/logger/logger.module';
 
@@ -25,10 +30,28 @@ import { LoggerModule } from './infra/logger/logger.module';
     // PostgresDatabaseModule.forRoot(),
     // @end-module:db-postgres
     HealthModule,
+    // @module:auth
+    AuthModule,
+    // @end-module:auth
     ThrottlerModule.forRootAsync({
       inject: [APP_CONFIG],
       useFactory: (config: AppConfig) => ({
-        throttlers: [{ ttl: config.THROTTLE_TTL_MS, limit: config.THROTTLE_LIMIT }],
+        throttlers: [
+          { ttl: config.THROTTLE_TTL_MS, limit: config.THROTTLE_LIMIT },
+          // @module:auth
+          {
+            name: 'login',
+            ttl: config.LOGIN_THROTTLE_TTL_MS,
+            limit: config.LOGIN_THROTTLE_LIMIT,
+            // The stricter `login` throttler must guard only the login route
+            // (v6 applies every registered throttler to all routes, so scope
+            // it here instead of skipping it on every other controller). The
+            // login handler opts out of the default throttler itself.
+            skipIf: (context: ExecutionContext) =>
+              context.getHandler() !== AuthController.prototype.login,
+          },
+          // @end-module:auth
+        ],
       }),
     }),
   ],

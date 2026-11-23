@@ -102,3 +102,37 @@ describe('request log JSON shape (AC-M03.14)', () => {
     expect(JSON.stringify(line)).not.toContain('secret-token-value');
   });
 });
+
+describe('userId in request logs (AC-M06.15)', () => {
+  function requestLine(req: Record<string, unknown>): Record<string, unknown> {
+    const { stream, lines } = capture();
+    const options = buildPinoHttpOptions(baseConfig, stream);
+    const httpLogger = pinoHttp(options);
+    const res = Object.assign(new EventEmitter(), {
+      statusCode: 200,
+      headersSent: true,
+      writableEnded: true,
+    }) as unknown as ServerResponse;
+    httpLogger(req as unknown as IncomingMessage, res, () => {});
+    res.emit('finish');
+    return JSON.parse(lines.join('')) as Record<string, unknown>;
+  }
+
+  it('adds userId when the auth guard attached req.user', () => {
+    const line = requestLine({
+      id: 'req-9',
+      method: 'GET',
+      url: '/api/v1/auth/me',
+      user: { id: 'user-42', roles: ['user'], sid: 'session-9' },
+    });
+    expect(line.userId).toBe('user-42');
+    expect(line.requestId).toBe('req-9');
+    // Only the id crosses over — never roles, sid, headers or the token.
+    expect(JSON.stringify(line)).not.toContain('session-9');
+  });
+
+  it('omits userId for anonymous requests', () => {
+    const line = requestLine({ id: 'req-8', method: 'GET', url: '/api/v1/health/live' });
+    expect(line).not.toHaveProperty('userId');
+  });
+});
