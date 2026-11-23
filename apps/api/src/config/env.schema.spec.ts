@@ -60,7 +60,12 @@ describe('env schema', () => {
   });
 
   it('requires MONGO_URI in production but not in development', () => {
-    const prod = { NODE_ENV: 'production', CORS_ORIGIN: 'https://example.com' };
+    const prod = {
+      NODE_ENV: 'production',
+      CORS_ORIGIN: 'https://example.com',
+      // Satisfies the auth fragment's production secret rule (see auth.env.spec.ts).
+      JWT_ACCESS_SECRET: 'Zq8vK2mXr9LpT4wYc7NbH3sFj6DgA1eU',
+    };
     const missing = envSchema.safeParse(prod);
     expect(missing.success).toBe(false);
     if (!missing.success) {

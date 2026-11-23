@@ -28,7 +28,9 @@ export abstract class MongoRepository<T extends { id: string }> implements Repos
   private readonly translator: MongoQueryTranslator;
 
   constructor(
-    private readonly model: Model<MongoDocument<T>>,
+    // Protected so feature repositories (e.g. auth) can run atomic operations
+    // through the model while normal CRUD keeps flowing through this port.
+    protected readonly model: Model<MongoDocument<T>>,
     allowedFields: readonly string[],
   ) {
     this.translator = new MongoQueryTranslator(allowedFields);

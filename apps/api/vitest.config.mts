@@ -19,7 +19,12 @@ export default defineConfig({
     testTimeout: 30000,
     coverage: {
       provider: 'v8',
-      include: ['src/common/**/*.ts', 'src/config/**/*.ts', 'src/infra/database/**/*.ts'],
+      include: [
+        'src/common/**/*.ts',
+        'src/config/**/*.ts',
+        'src/infra/database/**/*.ts',
+        'src/modules/auth/**/*.ts',
+      ],
       exclude: [
         'src/**/*.spec.ts',
         'src/**/testing/**',
@@ -28,7 +33,12 @@ export default defineConfig({
         'src/**/index.ts',
       ],
       reporter: ['text', 'json-summary'],
-      thresholds: { lines: 80, 'src/infra/database/**': { lines: 85 } },
+      thresholds: {
+        lines: 80,
+        'src/infra/database/**': { lines: 85 },
+        // Security-critical module (AC-M06.18); services land in slice 2.
+        'src/modules/auth/**': { lines: 90 },
+      },
     },
   },
 });

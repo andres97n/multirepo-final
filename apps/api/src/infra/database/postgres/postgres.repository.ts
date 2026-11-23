@@ -24,8 +24,10 @@ export abstract class PostgresRepository<T extends { id: string }> implements Re
   private readonly fieldByColumn: ReadonlyMap<string, string>;
 
   constructor(
-    private readonly db: PostgresDb,
-    private readonly table: PgTable,
+    // Protected so feature repositories (e.g. auth) can run atomic statements
+    // against the table while normal CRUD keeps flowing through this port.
+    protected readonly db: PostgresDb,
+    protected readonly table: PgTable,
     allowedFields: readonly string[],
   ) {
     this.translator = new PostgresQueryTranslator(table, allowedFields);

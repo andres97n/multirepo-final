@@ -89,6 +89,8 @@ describe('MongoDatabaseModule', () => {
       NODE_ENV: 'production',
       MONGO_URI: 'mongodb://127.0.0.1:9/prod',
       MONGO_TIMEOUT_MS: '200',
+      // The auth marker region adds a required-in-production secret.
+      JWT_ACCESS_SECRET: 'Zq8vK2mXr9LpT4wYc7NbH3sFj6DgA1eU',
     });
     const moduleRef = await builder.compile();
     try {

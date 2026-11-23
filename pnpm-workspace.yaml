@@ -9,5 +9,7 @@ minimumReleaseAge: 1440
 allowBuilds:
   '@swc/core': true
   '@scarf/scarf': false
+  # argon2 ships prebuilds; the fallback node-gyp build needs an install script.
+  argon2: true
   # Not enabled: the mongodb-memory-server binary downloads on first test run.
   mongodb-memory-server: false

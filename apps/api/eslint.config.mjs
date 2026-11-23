@@ -52,4 +52,14 @@ export default [
     files: ['src/infra/database/postgres/**/*.ts'],
     rules: driverRule(MONGO_DRIVERS),
   },
+  // The auth module's own adapters follow the same rule as the infra adapters:
+  // each folder lifts only its engine's group (specs/testing included).
+  {
+    files: ['src/modules/auth/mongo/**/*.ts'],
+    rules: driverRule(POSTGRES_DRIVERS),
+  },
+  {
+    files: ['src/modules/auth/postgres/**/*.ts'],
+    rules: driverRule(MONGO_DRIVERS),
+  },
 ];
