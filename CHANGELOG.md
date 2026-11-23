@@ -2,6 +2,26 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.5.0] - 2026-11-22
+
+### Added
+
+- **22:30 — `0a188c0`, `5a51f24`, `d80f143`, `2628f2f`, `bc593d2` feat(api): add auth module (M06)**
+  - `modules/auth` (`@module:auth`): Argon2id passwords, HS256 access JWT (`sub`, `roles`, `sid`, `iss`/`aud` checked), rotating refresh sessions in families with reuse detection and a bounded grace window, progressive lockout, global `JwtAuthGuard` + `RolesGuard`, `@Public()` / `@Roles()`.
+  - Endpoints: `POST /auth/login`, `/auth/refresh`, `/auth/logout`, `GET /auth/me`, admin `GET /users` (paginated + filtered).
+  - Users/sessions ports with Mongo and Postgres adapters (+ first Postgres migration) sharing one contract suite; per-IP `login` throttler; `seed:admin` command; expired-session cleanup interval.
+  - Contracts: `TokenPair`, `RefreshInput`, `UserStatus`, `UserListItem`, `UsersQuery`, `UsersPage`.
+  - E2E auth suite on Mongo and on Postgres (PGlite); ADR-0006; "Auth module" section in `apps/api/AGENTS.md`.
+
+### Security
+
+- Refresh rotation is an atomic compare-and-swap on the presented token and every retired hash is remembered, so concurrent refreshes cannot both succeed and old-token replays always revoke the family.
+- Passwords stored only as argon2id hashes; refresh tokens only as SHA-256 hex; identical 401 for unknown email, wrong password, disabled or locked accounts; logs carry `userId` or a hashed email only.
+
+### Changed
+
+- `@Public()` lives in `src/common/` so health stays free of auth imports; `MongoRepository`/`PostgresRepository` expose `model`/`db`/`table` as `protected` for adapter-specific atomic operations.
+
 ## [0.4.0] - 2026-11-22
 
 ### Added
