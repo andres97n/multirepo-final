@@ -92,6 +92,7 @@ multirepo-final/
 │  ├─ config-typescript/        base · nest · next · library tsconfig presets
 │  └─ config-eslint/            base · nest · next flat-config presets
 ├─ scripts/modules.mjs          deterministic prune/apply of modules (used by /scaffold)
+├─ scripts/live-check/          one-shot checks against real DBs in Docker (lib.sh, api-health.sh)
 ├─ modules.json                 module manifest: paths, deps, env, markers, docs, requires/conflicts
 ├─ perf-budgets.json · lighthouserc.json   performance budgets
 ├─ compose.dev.yaml · compose.yaml          dev services (mongo, postgres) / prod-like stack
@@ -192,6 +193,19 @@ pnpm --filter @repo/contracts build        # contracts must build before consume
 pnpm modules:check       # validate modules.json + markers (M11)
 ```
 
+## Live verification (real databases in Docker)
+
+Anything that needs a running process or a real DB goes through a one-shot script in `scripts/live-check/`, never a dev server or watcher started by hand.
+
+```bash
+bash scripts/live-check/api-health.sh postgres   # or: mongo
+```
+
+- Needs Docker running. Uses its own compose project (`lc-<task>`) and spare ports (Postgres 5433, Mongo 27018, API 3915), so unrelated containers and a local Mongo on the default ports are never touched.
+- Hard timeout 480 s. It always tears down (containers and volumes removed, temporarily edited marker files reverted) and exits non-zero if a check fails. Logs go to `.tasks/.result/logs/`.
+- New checks reuse `scripts/live-check/lib.sh` (`lc_init`, `lc_wait_for`, `lc_start_api`, `lc_res`, `lc_finish`).
+- PGlite and mongodb-memory-server stay the unit/e2e default; the live check is the proof against the real engines.
+
 ## Rules for agents
 
 1. Read the relevant nested `AGENTS.md` before you edit: `apps/api`, `packages/contracts`, and later `apps/web` and `packages/ui`.
@@ -226,7 +240,7 @@ pnpm modules:check       # validate modules.json + markers (M11)
 | M02 | Contracts                               | Done        |
 | M03 | API core                                | Done        |
 | M04 | db-core + db-mongo                      | Done        |
-| M05 | db-postgres                             | In review   |
+| M05 | db-postgres                             | Done        |
 | M06 | Auth (api)                              | Done        |
 | M07 | packages/ui                             | Done        |
 | M08 | Web core                                | Not started |

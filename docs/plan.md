@@ -114,7 +114,7 @@ Each milestone has its own file in [`milestones/`](./milestones/). The file hold
 | M02 | [Contracts](./milestones/M02-contracts.md)                     | M01           | Done        | Zod schemas as the single source of truth for HTTP shapes                         |
 | M03 | [API core](./milestones/M03-api-core.md)                       | M02           | Done        | Nest app with config, validation, errors, request-id, logs, security, health/live |
 | M04 | [db-core + db-mongo](./milestones/M04-db-core-mongo.md)        | M03           | Done        | DB ports + Mongo adapter passing the repository contract suite                    |
-| M05 | [db-postgres](./milestones/M05-db-postgres.md)                 | M04           | In review   | Drizzle adapter passing the same contract suite                                   |
+| M05 | [db-postgres](./milestones/M05-db-postgres.md)                 | M04           | Done        | Drizzle adapter passing the same contract suite                                   |
 | M06 | [Auth (api)](./milestones/M06-auth-api.md)                     | M04, M05      | Done        | JWT + rotating refresh families, Argon2id, lockout, RBAC, on both engines         |
 | M07 | [packages/ui](./milestones/M07-ui-package.md)                  | M01           | Done        | Tailwind v4 tokens + accessible shadcn primitives                                 |
 | M08 | [Web core](./milestones/M08-web-core.md)                       | M03, M07      | Not started | Next app with env, typed api client, errors, headers and CSP                      |

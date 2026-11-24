@@ -2,7 +2,7 @@
 
 | Field      | Value                                          |
 | ---------- | ---------------------------------------------- |
-| Status     | In review (live compose checks pending)        |
+| Status     | Done                                           |
 | Depends on | [M04](./M04-db-core-mongo.md)                  |
 | PRD refs   | FR-3.1, FR-3.2, FR-3.3, FR-3.4, FR-4.1 (ready) |
 | Axes       | 1 (Modular), 5 (Security), 6 (Infra)           |
