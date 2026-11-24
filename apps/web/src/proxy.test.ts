@@ -1,5 +1,16 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
+
+vi.mock('./lib/env', () => ({
+  env: {
+    API_URL: 'http://localhost:3001',
+    API_TIMEOUT_MS: 5000,
+    APP_ORIGIN: 'http://localhost:3000',
+    SESSION_SECRET: 'proxy-test-secret-0123456789abcdefghijk',
+    SESSION_MAX_AGE_SECONDS: 3600,
+    SESSION_REFRESH_SKEW_SECONDS: 60,
+  },
+}));
 
 import proxy, { config } from './proxy';
 import { isValidRequestId } from './lib/request-id';
@@ -9,17 +20,17 @@ function run(headers: Record<string, string> = {}) {
 }
 
 describe('proxy', () => {
-  it('generates a different nonce per request', () => {
-    const first = run().headers.get('content-security-policy');
-    const second = run().headers.get('content-security-policy');
+  it('generates a different nonce per request', async () => {
+    const first = (await run()).headers.get('content-security-policy');
+    const second = (await run()).headers.get('content-security-policy');
 
     expect(first).toContain('nonce-');
     expect(second).toContain('nonce-');
     expect(first).not.toBe(second);
   });
 
-  it('sets the nonce on the request headers so Next applies it to its scripts', () => {
-    const response = run();
+  it('sets the nonce on the request headers so Next applies it to its scripts', async () => {
+    const response = await run();
 
     const nonce = response.headers.get('x-middleware-request-x-nonce');
     expect(nonce).toBeTruthy();
@@ -28,8 +39,8 @@ describe('proxy', () => {
     expect(requestCsp).toContain("'strict-dynamic'");
   });
 
-  it('sets the nonce CSP and security headers on the response', () => {
-    const response = run();
+  it('sets the nonce CSP and security headers on the response', async () => {
+    const response = await run();
     const csp = response.headers.get('content-security-policy');
 
     expect(csp).toContain("default-src 'self'");
@@ -42,23 +53,23 @@ describe('proxy', () => {
     expect(response.headers.get('x-frame-options')).toBe('DENY');
   });
 
-  it('forwards a valid incoming x-request-id and echoes it on the response', () => {
-    const response = run({ 'x-request-id': 'live-check-rid-123' });
+  it('forwards a valid incoming x-request-id and echoes it on the response', async () => {
+    const response = await run({ 'x-request-id': 'live-check-rid-123' });
 
     expect(response.headers.get('x-request-id')).toBe('live-check-rid-123');
     expect(response.headers.get('x-middleware-request-x-request-id')).toBe('live-check-rid-123');
   });
 
-  it('replaces an invalid incoming x-request-id with a generated one', () => {
-    const response = run({ 'x-request-id': '<script>alert(1)</script>' });
+  it('replaces an invalid incoming x-request-id with a generated one', async () => {
+    const response = await run({ 'x-request-id': '<script>alert(1)</script>' });
 
     const requestId = response.headers.get('x-request-id');
     expect(requestId).not.toBe('<script>alert(1)</script>');
     expect(isValidRequestId(requestId)).toBe(true);
   });
 
-  it('generates an x-request-id when the incoming request has none', () => {
-    const requestId = run().headers.get('x-request-id');
+  it('generates an x-request-id when the incoming request has none', async () => {
+    const requestId = (await run()).headers.get('x-request-id');
 
     expect(isValidRequestId(requestId)).toBe(true);
   });

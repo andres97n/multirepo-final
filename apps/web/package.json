@@ -17,6 +17,7 @@
   "dependencies": {
     "@repo/contracts": "workspace:*",
     "@repo/ui": "workspace:*",
+    "jose": "6.2.18",
     "next": "16.4.6",
     "react": "19.3.1",
     "react-dom": "19.3.1",

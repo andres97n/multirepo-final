@@ -128,6 +128,25 @@ describe('runSeed (CLI orchestration with a faked application context)', () => {
     expect(users.rows.size).toBe(1);
   });
 
+  // The engine adapters `implements` the port, so they are never `instanceof` it.
+  it('accepts a repository that implements the port without extending it', async () => {
+    const { users, passwords } = build();
+    const adapter = {
+      findByEmail: users.findByEmail.bind(users),
+      create: users.create.bind(users),
+    };
+    const h = harness(users, passwords);
+    await runSeed({
+      ...h.deps,
+      createContext: () =>
+        Promise.resolve({
+          get: (token: unknown): unknown => (token === UsersRepository ? adapter : passwords),
+          close: h.close,
+        }),
+    });
+    expect(h.write).toHaveBeenCalledWith(expect.stringContaining('created admin'));
+  });
+
   it('a repeated run reports "already exists" without touching the user', async () => {
     const { users, passwords } = build();
     await seedAdmin(users, passwords, EMAIL, PASSWORD);

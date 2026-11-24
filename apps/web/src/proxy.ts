@@ -2,6 +2,9 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 import { buildCsp, securityHeaders } from './lib/csp';
 import { resolveRequestId } from './lib/request-id';
+// @module:auth
+import { authProxy } from './lib/auth-proxy';
+// @end-module:auth
 
 /**
  * Per-request headers for DYNAMIC routes only (AC-M08.8 / AC-M08.9):
@@ -14,7 +17,7 @@ import { resolveRequestId } from './lib/request-id';
  * them to render dynamically, so they get the nonce-less policy from
  * `next.config.ts` `headers()` instead.
  */
-export default function proxy(request: NextRequest): NextResponse {
+export default async function proxy(request: NextRequest): Promise<NextResponse> {
   const nonce = btoa(crypto.randomUUID());
   const requestId = resolveRequestId(request.headers.get('x-request-id'));
   const csp = buildCsp({
@@ -30,6 +33,15 @@ export default function proxy(request: NextRequest): NextResponse {
   requestHeaders.set('content-security-policy', csp);
   requestHeaders.set('x-request-id', requestId);
 
+  // `Set-Cookie` values for the continued response (auth refresh rotation).
+  const pendingCookies: string[] = [];
+  // @module:auth
+  const authRedirect = await authProxy(request, requestHeaders, pendingCookies);
+  if (authRedirect !== null) {
+    return authRedirect;
+  }
+  // @end-module:auth
+
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set('content-security-policy', csp);
   for (const [key, value] of Object.entries(
@@ -38,6 +50,9 @@ export default function proxy(request: NextRequest): NextResponse {
     response.headers.set(key, value);
   }
   response.headers.set('x-request-id', requestId);
+  for (const cookie of pendingCookies) {
+    response.headers.append('set-cookie', cookie);
+  }
   return response;
 }
 
@@ -46,8 +61,9 @@ export default function proxy(request: NextRequest): NextResponse {
  * pages (`/about`, `/_not-found`), which keep their static (○) rendering and
  * the `next.config.ts` headers. `missing` skips `next/link` prefetches so a
  * per-request nonce never lands in a cached prefetch response (recommended by
- * the Next 16 CSP guide). Add every new static page to the exclusion list.
- * Constants only: Next statically analyses the matcher.
+ * the Next 16 CSP guide) and auth redirects never hijack a prefetch. Add every
+ * new static page to the exclusion list. Constants only: Next statically
+ * analyses the matcher.
  */
 export const config = {
   matcher: [

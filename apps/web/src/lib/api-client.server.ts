@@ -79,6 +79,8 @@ export function isApiUnreachable(error: unknown): boolean {
 export interface ApiRequestOptions {
   /** Explicit outgoing request id (tests); otherwise forwarded from the incoming request. */
   requestId?: string;
+  /** Access token sent as `authorization: Bearer <token>` (BFF auth calls). */
+  token?: string;
   /** Overrides `env.API_TIMEOUT_MS`. */
   timeoutMs?: number;
   /** Fetch cache mode; defaults to `no-store` (server-side BFF calls are never cached). */
@@ -125,6 +127,9 @@ async function apiRequest<T>(
     accept: 'application/json',
     'x-request-id': requestId,
   };
+  if (options.token !== undefined) {
+    requestHeaders['authorization'] = `Bearer ${options.token}`;
+  }
   if (body !== undefined) {
     requestHeaders['content-type'] = 'application/json';
   }

@@ -2,7 +2,7 @@
 
 | Field      | Value                                              |
 | ---------- | -------------------------------------------------- |
-| Status     | Not started                                        |
+| Status     | Done                                               |
 | Depends on | [M06](./M06-auth-api.md), [M08](./M08-web-core.md) |
 | PRD refs   | FR-2.8, FR-2.10, FR-4.3, NFR-SEC-3, NFR-SEC-7      |
 | Axes       | 1 (Modular), 2 (Contracts), 5 (Security)           |
@@ -21,24 +21,24 @@ The web app acts as a Backend-for-Frontend for the `auth` module. Tokens live on
 
 ## Tasks
 
-- [ ] `lib/session.ts`:
+- [x] `lib/session.ts`:
   - jose `EncryptJWT` (`dir` + `A256GCM`) holding `{ accessToken, refreshToken, accessExp }`.
   - Key from `SESSION_SECRET` (≥ 32 bytes); supports `SESSION_SECRET_PREVIOUS` for rotation (decrypt with either, encrypt with the current one).
   - Cookie: name `__Host-session` in production, httpOnly, Secure in production, `SameSite=Lax`, `Path=/`, max-age = refresh lifetime.
-- [ ] `lib/csrf.ts`:
+- [x] `lib/csrf.ts`:
   - `assertSameOrigin(request)` checks `Origin` (falling back to `Referer`) against `APP_ORIGIN`, plus `Sec-Fetch-Site` ∈ {same-origin, none}. Rejects with 403 otherwise.
   - Applied in **every** mutating route handler (wrapper `withCsrf(handler)`).
   - Server Actions rely on Next's built-in origin check, plus `serverActions.allowedOrigins` configured; documented.
-- [ ] `POST /api/auth/login`: validates `LoginInput` (contracts), calls the api, sets the cookie, returns `{ ok }`. Never returns tokens to the browser.
-- [ ] `POST /api/auth/logout`: calls api logout (best effort) and always clears the cookie.
-- [ ] `proxy.ts`:
+- [x] `POST /api/auth/login`: validates `LoginInput` (contracts), calls the api, sets the cookie, returns `{ ok }`. Never returns tokens to the browser.
+- [x] `POST /api/auth/logout`: calls api logout (best effort) and always clears the cookie.
+- [x] `proxy.ts`:
   - `(app)/*` without a valid session → redirect `/login?next=<path>`.
   - Access token expiring within the skew (env, default 60 s) → refresh via api, rewrite the cookie.
   - Refresh failure → clear the cookie and redirect.
-- [ ] `next` param sanitizer: only same-origin relative paths starting with a single `/`. Rejects `//`, `/\`, absolute URLs and `javascript:`.
-- [ ] Login page: form with `@repo/ui` FormField, validated by `LoginInput` on the client (UX) and in the handler (trust boundary); generic error message; disabled state while submitting.
-- [ ] Dashboard (RSC): reads the session server-side, calls `/auth/me` via `api-client.server`, shows the user and a logout button.
-- [ ] `@module:auth` markers in proxy, layout navigation, env schema and `.env.example`.
+- [x] `next` param sanitizer: only same-origin relative paths starting with a single `/`. Rejects `//`, `/\`, absolute URLs and `javascript:`.
+- [x] Login page: form with `@repo/ui` FormField, validated by `LoginInput` on the client (UX) and in the handler (trust boundary); generic error message; disabled state while submitting.
+- [x] Dashboard (RSC): reads the session server-side, calls `/auth/me` via `api-client.server`, shows the user and a logout button.
+- [x] `@module:auth` markers in proxy, layout navigation, env schema and `.env.example`.
 
 ## Deliverables
 

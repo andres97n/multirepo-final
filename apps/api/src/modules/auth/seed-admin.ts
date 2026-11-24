@@ -85,6 +85,20 @@ interface SeedContext {
 }
 
 /**
+ * Structural "is wired" check for the users port. `instanceof UsersRepository`
+ * cannot be used: the engine adapters `implement` the abstract-class port
+ * (they already extend their engine base class), so instances carry no
+ * `UsersRepository` prototype — the DI token is the only link.
+ */
+function isUsersRepository(value: unknown): value is UsersRepository {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const candidate = value as Partial<Pick<UsersRepository, 'findByEmail' | 'create'>>;
+  return typeof candidate.findByEmail === 'function' && typeof candidate.create === 'function';
+}
+
+/**
  * Everything `run` needs, injected so it is unit-testable without booting a
  * real Nest app, database or terminal. The default wiring below is the only
  * place `NestFactory`/`process` are touched.
@@ -112,7 +126,7 @@ export async function runSeed(deps: SeedDeps): Promise<void> {
   const app = await deps.createContext();
   try {
     const usersValue = app.get(UsersRepository);
-    if (!(usersValue instanceof UsersRepository)) {
+    if (!isUsersRepository(usersValue)) {
       throw new Error('seed:admin: UsersRepository is not wired (is @module:auth active?)');
     }
     const passwordsValue = app.get(PasswordService);

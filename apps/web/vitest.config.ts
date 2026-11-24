@@ -42,6 +42,11 @@ export default defineConfig({
         statements: 80,
         functions: 80,
         branches: 80,
+        // @module:auth
+        'src/lib/session.ts': { lines: 90, statements: 90, functions: 90, branches: 90 },
+        'src/lib/csrf.ts': { lines: 90, statements: 90, functions: 90, branches: 90 },
+        'src/lib/safe-redirect.ts': { lines: 90, statements: 90, functions: 90, branches: 90 },
+        // @end-module:auth
       },
     },
   },
