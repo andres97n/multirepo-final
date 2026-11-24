@@ -6,7 +6,19 @@
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!**/*.test.*"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
-      "env": ["NODE_ENV"]
+      "env": [
+        "NODE_ENV",
+        // @module:auth
+        "APP_ORIGIN",
+        "SESSION_SECRET",
+        "SESSION_SECRET_PREVIOUS",
+        "SESSION_MAX_AGE_SECONDS",
+        "SESSION_REFRESH_SKEW_SECONDS",
+        // @end-module:auth
+        "API_URL",
+        "API_TIMEOUT_MS",
+        "CSP_REPORT_URI"
+      ]
     },
     "lint": { "dependsOn": ["^lint"], "outputs": [] },
     "typecheck": { "dependsOn": ["^typecheck"], "outputs": [] },
