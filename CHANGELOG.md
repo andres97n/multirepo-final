@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.6.0] - 2026-11-23
+
+### Added
+
+- **20:14 — `f8a600f`, `d087bf8` feat(ui): add `@repo/ui` shared UI package (M07)**
+  - Source-only package: `@repo/ui/tokens.css`, `@repo/ui/components/*`, `@repo/ui/lib/cn`; React 19 as peer dependency, no Next.js dependency.
+  - Tailwind v4 tokens (`@theme inline`) with light and dark themes: `prefers-color-scheme` by default, `data-theme="light|dark"` override, CSS-only so there is no flash on load.
+  - Primitives: Button (cva variants and sizes), Input, Label, Card, FormField (`aria-invalid` / `aria-describedby` wiring), Toaster (sonner, colors bound to the tokens so it follows both `prefers-color-scheme` and `data-theme`); `cn()` helper; `components.json` for the shadcn CLI.
+  - Tests: Vitest + Testing Library + jsdom, a vitest-axe check per component, WCAG AA contrast tests computed from the tokens, and a real Tailwind compile test proving `@source` generates the package utilities. 41 tests, 100% line coverage.
+  - ADR-0007 and `packages/ui/AGENTS.md` (boundary rule: only generic, unbranded primitives live here).
+
+### Changed
+
+- `pnpm-workspace.yaml`: `esbuild` added to `allowBuilds` (needed by the Vitest/Tailwind tooling install).
+
 ## [0.5.0] - 2026-11-22
 
 ### Added
