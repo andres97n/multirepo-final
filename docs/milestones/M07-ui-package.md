@@ -2,7 +2,7 @@
 
 | Field      | Value                                    |
 | ---------- | ---------------------------------------- |
-| Status     | Not started                              |
+| Status     | Done                                     |
 | Depends on | [M01](./M01-repo-skeleton.md)            |
 | PRD refs   | §4.1 packages/ui, NFR-QUAL-1, NFR-QUAL-2 |
 | Axes       | 1 (Modular), 3 (Monorepo), 4 (Quality)   |
@@ -21,14 +21,14 @@ Tokens, theme switching mechanism, primitives: Button, Input, Label, Card, FormF
 
 ## Tasks
 
-- [ ] `packages/ui` package: `exports` for `./tokens.css`, `./components/*`, `./lib/cn`.
-- [ ] `tokens.css` (Tailwind v4 `@theme`): color (semantic: background, foreground, primary, muted, destructive, border, ring), radius, spacing scale, font families.
-- [ ] Dark mode via `prefers-color-scheme` with a `data-theme` override. No flash on load (inline script in M08, or CSS-only approach).
-- [ ] shadcn primitives copied in and adapted: Button (variants via cva), Input, Label, Card, FormField (label + control + description + error with `aria-describedby`/`aria-invalid`), Toaster.
-- [ ] `cn()` helper (clsx + tailwind-merge).
-- [ ] Vitest + Testing Library + jsdom tests; `vitest-axe` (or axe-core) accessibility check per component.
-- [ ] `components.json` so `shadcn add` targets this package.
-- [ ] `packages/ui/AGENTS.md`: what belongs here vs in `apps/web`.
+- [x] `packages/ui` package: `exports` for `./tokens.css`, `./components/*`, `./lib/cn`.
+- [x] `tokens.css` (Tailwind v4 `@theme`): color (semantic: background, foreground, primary, muted, destructive, border, ring), radius, spacing scale, font families.
+- [x] Dark mode via `prefers-color-scheme` with a `data-theme` override. No flash on load (inline script in M08, or CSS-only approach).
+- [x] shadcn primitives copied in and adapted: Button (variants via cva), Input, Label, Card, FormField (label + control + description + error with `aria-describedby`/`aria-invalid`), Toaster.
+- [x] `cn()` helper (clsx + tailwind-merge).
+- [x] Vitest + Testing Library + jsdom tests; `vitest-axe` (or axe-core) accessibility check per component.
+- [x] `components.json` so `shadcn add` targets this package.
+- [x] `packages/ui/AGENTS.md`: what belongs here vs in `apps/web`.
 
 ## Deliverables
 

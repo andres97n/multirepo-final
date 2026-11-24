@@ -116,7 +116,7 @@ Each milestone has its own file in [`milestones/`](./milestones/). The file hold
 | M04 | [db-core + db-mongo](./milestones/M04-db-core-mongo.md)        | M03           | Done        | DB ports + Mongo adapter passing the repository contract suite                    |
 | M05 | [db-postgres](./milestones/M05-db-postgres.md)                 | M04           | In review   | Drizzle adapter passing the same contract suite                                   |
 | M06 | [Auth (api)](./milestones/M06-auth-api.md)                     | M04, M05      | Done        | JWT + rotating refresh families, Argon2id, lockout, RBAC, on both engines         |
-| M07 | [packages/ui](./milestones/M07-ui-package.md)                  | M01           | Not started | Tailwind v4 tokens + accessible shadcn primitives                                 |
+| M07 | [packages/ui](./milestones/M07-ui-package.md)                  | M01           | Done        | Tailwind v4 tokens + accessible shadcn primitives                                 |
 | M08 | [Web core](./milestones/M08-web-core.md)                       | M03, M07      | Not started | Next app with env, typed api client, errors, headers and CSP                      |
 | M09 | [Web auth (BFF)](./milestones/M09-web-auth.md)                 | M06, M08      | Not started | Encrypted cookie session, proxy protection/refresh, CSRF                          |
 | M10 | [Playwright](./milestones/M10-playwright.md)                   | M09           | Not started | Prod-build browser smoke, auth / no-auth projects                                 |

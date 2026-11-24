@@ -228,7 +228,7 @@ pnpm modules:check       # validate modules.json + markers (M11)
 | M04 | db-core + db-mongo                      | Done        |
 | M05 | db-postgres                             | In review   |
 | M06 | Auth (api)                              | Done        |
-| M07 | packages/ui                             | Not started |
+| M07 | packages/ui                             | Done        |
 | M08 | Web core                                | Not started |
 | M09 | Web auth (BFF)                          | Not started |
 | M10 | Playwright                              | Not started |
