@@ -4,6 +4,8 @@ All notable changes to this project are documented here. Format based on [Keep a
 
 ## [0.8.0] - 2026-11-24
 
+- **18:42 — `292c637` chore:** ignore the generated `next-env.d.ts` and `*.tsbuildinfo` files.
+
 ### Added
 
 - **18:40 — `819272c`, `68a52ee` feat(web): auth Backend-for-Frontend (M09), inside `@module:auth`**
