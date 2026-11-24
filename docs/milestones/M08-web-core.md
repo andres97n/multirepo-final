@@ -2,7 +2,7 @@
 
 | Field      | Value                                                                    |
 | ---------- | ------------------------------------------------------------------------ |
-| Status     | Not started                                                              |
+| Status     | Done                                                                     |
 | Depends on | [M03](./M03-api-core.md), [M07](./M07-ui-package.md)                     |
 | PRD refs   | FR-4.3, NFR-SEC-1, NFR-SEC-2, NFR-SEC-3, NFR-SEC-7, NFR-QUAL-1, NFR-DX-1 |
 | Axes       | 2 (Contracts), 5 (Security), 7 (Observability)                           |
@@ -21,28 +21,28 @@ A Next.js 16 App Router app with no auth. It has validated server-only env, a ty
 
 ## Tasks
 
-- [ ] Next 16 app: `typedRoutes`, `output: 'standalone'`, `poweredByHeader: false`, React strict mode.
-- [ ] `lib/env.ts`:
+- [x] Next 16 app: `typedRoutes`, `output: 'standalone'`, `poweredByHeader: false`, React strict mode.
+- [x] `lib/env.ts`:
   - Zod schema, imported with `server-only`.
   - Fails `next build` and boot when invalid.
   - No `NEXT_PUBLIC_*` unless explicitly justified (rule written in AGENTS.md).
-- [ ] `lib/api-client.server.ts`:
+- [x] `lib/api-client.server.ts`:
   - `apiGet/apiPost(path, schema)` built on `fetch`, with base URL from env and timeout via `AbortSignal.timeout`.
   - Parses success with the contract schema and maps `ErrorEnvelope` → typed `ApiError`.
   - Forwards or creates `x-request-id`.
-- [ ] Layouts: root layout (tokens, theme script, font), `(public)` group with a home page that shows api health via an RSC fetch.
-- [ ] `error.tsx`, `global-error.tsx`, `not-found.tsx`; errors show the `requestId` for support and never the stack.
-- [ ] `app/api/health/route.ts`: web liveness, plus `?deep=1` to check api reachability.
-- [ ] Security headers (in `next.config` headers for static and in `proxy.ts` for dynamic):
+- [x] Layouts: root layout (tokens, theme script, font), `(public)` group with a home page that shows api health via an RSC fetch.
+- [x] `error.tsx`, `global-error.tsx`, `not-found.tsx`; errors show the `requestId` for support and never the stack.
+- [x] `app/api/health/route.ts`: web liveness, plus `?deep=1` to check api reachability.
+- [x] Security headers (in `next.config` headers for static and in `proxy.ts` for dynamic):
   - HSTS (production only), `Referrer-Policy: strict-origin-when-cross-origin`.
   - `Permissions-Policy` (camera, microphone, geolocation off), `X-Content-Type-Options: nosniff`, `frame-ancestors 'none'`.
-- [ ] CSP strategy (`lib/csp.ts`, recorded in ADR-0008):
+- [x] CSP strategy (`lib/csp.ts`, recorded in ADR-0008):
   - **Dynamic routes:** per-request nonce generated in `proxy.ts`; `script-src 'self' 'nonce-…' 'strict-dynamic'`; no `unsafe-eval` in production.
   - **Static routes:** stay static; a nonce-less policy delivered via `next.config` headers (hashes/SRI where Next supports it; otherwise the documented weaker `script-src` limited to `'self'` with the trade-off explained).
   - `connect-src` limited to self (the browser never calls the api directly).
   - `report-uri`/`report-to` optional via env.
-- [ ] Vitest (node + jsdom projects) for lib and components.
-- [ ] `apps/web/.env.example`, `apps/web/AGENTS.md`.
+- [x] Vitest (node + jsdom projects) for lib and components.
+- [x] `apps/web/.env.example`, `apps/web/AGENTS.md`.
 
 ## Deliverables
 

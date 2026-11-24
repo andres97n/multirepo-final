@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.7.0] - 2026-11-23
+
+### Added
+
+- **23:05 — `36ada97`, `e23da7d` feat(web): add `apps/web` Next.js 16 core (M08)**
+  - Validated server-only env (`env.schema.ts` + `server-only` `env.ts`): invalid or missing variables fail `next build` and boot naming the variable; no `NEXT_PUBLIC_*`.
+  - `api-client.server.ts`: `apiGet`/`apiPost` on contract schemas, `ErrorEnvelope` mapped to typed `ApiError`, `ApiTimeoutError`, `x-request-id` forwarded or generated.
+  - Home page (RSC api health), `error.tsx` / `global-error.tsx` / `not-found.tsx` showing the `requestId` and never the stack, `/api/health` with `?deep=1`.
+  - Security: headers on static and dynamic routes; `proxy.ts` per-request CSP nonce with `strict-dynamic` on dynamic routes; nonce-less CSP on static routes so they stay static; no `unsafe-eval` in production; client-bundle leak check.
+  - Vitest (node + jsdom): 64 tests, ~99% line coverage on `lib/`. Live check against a mock api.
+  - ADR-0008 and `apps/web/AGENTS.md`.
+  - Review fixes: readiness 503 `Health` body renders the health card instead of `error.tsx`; `CSP_REPORT_URI` is wired to both CSP paths and emits only `report-uri`; the static CSP allows `unsafe-eval` under `next dev` only.
+
+### Security
+
+- Static routes use `script-src 'self' 'unsafe-inline'` because Next emits inline scripts without hashes (documented in ADR-0008).
+
 ## [0.6.0] - 2026-11-23
 
 ### Added

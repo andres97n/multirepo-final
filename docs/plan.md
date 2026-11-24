@@ -117,7 +117,7 @@ Each milestone has its own file in [`milestones/`](./milestones/). The file hold
 | M05 | [db-postgres](./milestones/M05-db-postgres.md)                 | M04           | Done        | Drizzle adapter passing the same contract suite                                   |
 | M06 | [Auth (api)](./milestones/M06-auth-api.md)                     | M04, M05      | Done        | JWT + rotating refresh families, Argon2id, lockout, RBAC, on both engines         |
 | M07 | [packages/ui](./milestones/M07-ui-package.md)                  | M01           | Done        | Tailwind v4 tokens + accessible shadcn primitives                                 |
-| M08 | [Web core](./milestones/M08-web-core.md)                       | M03, M07      | Not started | Next app with env, typed api client, errors, headers and CSP                      |
+| M08 | [Web core](./milestones/M08-web-core.md)                       | M03, M07      | Done        | Next app with env, typed api client, errors, headers and CSP                      |
 | M09 | [Web auth (BFF)](./milestones/M09-web-auth.md)                 | M06, M08      | Not started | Encrypted cookie session, proxy protection/refresh, CSRF                          |
 | M10 | [Playwright](./milestones/M10-playwright.md)                   | M09           | Not started | Prod-build browser smoke, auth / no-auth projects                                 |
 | M11 | [Module system + skills](./milestones/M11-module-system.md)    | M06, M09, M10 | Not started | `modules.json`, prune script, scaffold + adr skills, OpenCode config              |
