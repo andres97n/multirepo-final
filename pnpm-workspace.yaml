@@ -13,3 +13,6 @@ allowBuilds:
   argon2: true
   # Not enabled: the mongodb-memory-server binary downloads on first test run.
   mongodb-memory-server: false
+  # esbuild ships prebuilt platform binaries; its install script links the
+  # platform package (pulled in by vitest/vite and @tailwindcss tooling).
+  esbuild: true

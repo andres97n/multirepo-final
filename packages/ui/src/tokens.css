@@ -1,0 +1,89 @@
+/*
+ * @repo/ui design tokens (Tailwind v4).
+ *
+ * Light values live on `:root`. Dark values follow `prefers-color-scheme`
+ * unless the document pins a theme with `data-theme="light|dark"` on <html>.
+ * Pure CSS: no script required, no flash on load.
+ */
+
+:root {
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --primary: #171717;
+  --primary-foreground: #fafafa;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #171717;
+  --muted: #f5f5f5;
+  --muted-foreground: #525252;
+  --destructive: #b91c1c;
+  --destructive-foreground: #fafafa;
+  --border: #e5e5e5;
+  --ring: #171717;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --background: #0a0a0a;
+    --foreground: #fafafa;
+    --primary: #fafafa;
+    --primary-foreground: #171717;
+    --secondary: #262626;
+    --secondary-foreground: #fafafa;
+    --muted: #262626;
+    --muted-foreground: #a3a3a3;
+    --destructive: #f87171;
+    --destructive-foreground: #0a0a0a;
+    --border: #262626;
+    --ring: #d4d4d4;
+    --card: #0a0a0a;
+    --card-foreground: #fafafa;
+  }
+}
+
+:root[data-theme='dark'] {
+  --background: #0a0a0a;
+  --foreground: #fafafa;
+  --primary: #fafafa;
+  --primary-foreground: #171717;
+  --secondary: #262626;
+  --secondary-foreground: #fafafa;
+  --muted: #262626;
+  --muted-foreground: #a3a3a3;
+  --destructive: #f87171;
+  --destructive-foreground: #0a0a0a;
+  --border: #262626;
+  --ring: #d4d4d4;
+  --card: #0a0a0a;
+  --card-foreground: #fafafa;
+}
+
+/* Map tokens onto Tailwind utility namespaces. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+
+  --spacing: 0.25rem;
+
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+}
