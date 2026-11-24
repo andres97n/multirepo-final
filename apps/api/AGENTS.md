@@ -66,6 +66,7 @@ logs, baseline security middleware and the database ports + Mongo adapter.
   `pnpm --filter api db:generate` and `pnpm --filter api db:migrate` (never on boot).
   Local Postgres: `docker compose -f compose.dev.yaml up -d --wait postgres`; the app
   connects as the non-superuser `app` role (`docker/postgres/init/01-app-role.sql`).
+- Real-DB proof (migrations, boot, `/health/ready` up/down/recovery): `bash scripts/live-check/api-health.sh <mongo|postgres>`; see "Live verification" in the root `AGENTS.md`.
 
 ## Switching database engine
 
