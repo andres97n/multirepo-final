@@ -2,6 +2,30 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.8.0] - 2026-11-24
+
+### Added
+
+- **18:40 — `819272c`, `68a52ee` feat(web): auth Backend-for-Frontend (M09), inside `@module:auth`**
+  - Encrypted session cookie (jose `dir` + `A256GCM`), with `SESSION_SECRET_PREVIOUS` for key rotation.
+  - `/api/auth/login` and `/api/auth/logout`, the `/login` and `/dashboard` pages and a logout button.
+  - `proxy.ts` protects `/dashboard` and refreshes the access token in place.
+  - Env: `APP_ORIGIN`, `SESSION_SECRET`, `SESSION_SECRET_PREVIOUS`, `SESSION_MAX_AGE_SECONDS`, `SESSION_REFRESH_SKEW_SECONDS`.
+  - ADR-0009 and the "Auth (BFF)" section of `apps/web/AGENTS.md`.
+
+### Changed
+
+- `apiGet` / `apiPost` accept a `token` option (Bearer).
+- `APP_ORIGIN` and `SESSION_SECRET` are now required by `next build`; `turbo.json` passes the web env to `build`.
+
+### Fixed
+
+- `b6f4f66`: `seed:admin` always failed against a real database. The adapters implement the `UsersRepository` port without extending it, so its `instanceof` check never passed.
+
+### Security
+
+- CSRF origin checks on every mutating route handler, safe `next` redirects, and example session secrets rejected in production.
+
 ## [0.7.0] - 2026-11-23
 
 ### Added
