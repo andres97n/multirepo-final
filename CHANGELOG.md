@@ -16,6 +16,8 @@ All notable changes to this project are documented here. Format based on [Keep a
 ### Changed
 
 - `pnpm-workspace.yaml`: `esbuild` added to `allowBuilds` (needed by the Vitest/Tailwind tooling install).
+- `d12a420` Tooling: `scripts/live-check/` (`lib.sh`, `api-health.sh <mongo|postgres>`) runs one-shot checks against real databases in Docker with a private compose project, spare ports, a hard timeout and guaranteed teardown, so agents can verify against real engines without starting servers by hand. Verified end to end, including an unattended OpenCode run.
+- `ef40d11` M05 closed: live checks ran against a real Postgres 17 in Docker (compose project, spare port): non-superuser `app` role, `db:migrate` twice is a no-op and `db:generate` finds no changes, engine swap touched only the `@module:db-*` regions of three files, API boots, `/health/ready` is 200 up, 503 down and recovers while `/health/live` stays 200.
 
 ## [0.5.0] - 2026-11-22
 
