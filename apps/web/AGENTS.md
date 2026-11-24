@@ -1,7 +1,7 @@
 # apps/web
 
-Next.js 16 (App Router, RSC) web app. No auth yet; it has validated server-only
-env, a typed server API client built on `@repo/contracts`, uniform error
+Next.js 16 (App Router, RSC) web app, the BFF for the optional `auth` module
+(see "Auth (BFF)"). It has validated server-only env, a typed server API client built on `@repo/contracts`, uniform error
 handling, a health route, security headers and a tested CSP strategy that keeps
 static routes static.
 
@@ -46,6 +46,43 @@ Rules:
   `config.matcher` (like `about`, `_not-found`); otherwise the proxy gives it a
   nonce and it silently becomes dynamic. Confirm with the `next build` route
   table (○). A dynamic page gets the nonce automatically.
+
+## Auth (BFF)
+
+`@module:auth`, see ADR-0009. Tokens exist only inside the encrypted session
+cookie; they never reach a response body or the RSC payload.
+
+| Concern                             | Where                                         |
+| ----------------------------------- | --------------------------------------------- |
+| Cookie encrypt / decrypt / rotation | `src/lib/session.ts`                          |
+| CSRF check (`withCsrf`)             | `src/lib/csrf.ts`                             |
+| `next` parameter sanitizer          | `src/lib/safe-redirect.ts`                    |
+| Route protection + token refresh    | `src/lib/auth-proxy.ts` (from `src/proxy.ts`) |
+| Login / logout handlers             | `src/app/api/auth/{login,logout}/route.ts`    |
+| Pages                               | `src/app/(auth)/login`, `(app)/dashboard`     |
+
+Env: `APP_ORIGIN`, `SESSION_SECRET` (required, also at `next build`),
+`SESSION_SECRET_PREVIOUS`, `SESSION_MAX_AGE_SECONDS`,
+`SESSION_REFRESH_SKEW_SECONDS` (see `.env.example`).
+
+### Add a protected page
+
+1. Create it under `src/app/(app)/<segment>/page.tsx`.
+2. Add `/<segment>` to `PROTECTED_PREFIXES` in `src/lib/auth-proxy.ts`. Route
+   groups do not appear in URLs, so the group alone protects nothing.
+3. Check the session in the page too (`readSession()`, then `redirect`): the
+   proxy skips prefetch requests.
+4. Call the api with `apiGet(path, schema, { token: session.accessToken })` and
+   render only non-secret fields.
+
+### Add a mutating handler
+
+1. Export it wrapped: `export const POST = withCsrf(handler);` (same for PUT,
+   PATCH and DELETE).
+2. Add the route file to the registry in `src/app/api/auth/handlers.test.ts`;
+   the test fails for an unlisted file.
+3. Validate the body with a `@repo/contracts` schema before calling the api.
+4. Server Actions do not use `withCsrf`: Next checks their origin.
 
 ## Env rule
 
