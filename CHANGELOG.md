@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.9.0] - 2026-11-24
+
+### Added
+
+- **19:07 — `ef2a8cf` test(web): Playwright E2E smoke suite (M10, tooling)**
+  - `pnpm test:e2e:web` runs against the production build of web and a running api, with an `auth` or `no-auth` project picked from the installed modules.
+  - CSP violations and uncaught page errors fail any test; `eslint-plugin-playwright` blocks focused and skipped tests.
+
+### Fixed
+
+- **19:07 — `b8bcf69` fix(web): CSP violations found by the browser suite (security)**
+  - `/login` no longer triggers a `script-src eval` report from Zod.
+  - Unknown URLs render a dynamic `global-not-found.tsx`, so their scripts carry the nonce instead of being blocked (ADR-0010).
+
 ## [0.8.0] - 2026-11-24
 
 - **18:42 — `292c637` chore:** ignore the generated `next-env.d.ts` and `*.tsbuildinfo` files.
