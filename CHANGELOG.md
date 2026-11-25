@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.11.1] - 2026-11-25
+
+### Security
+
+- **10:49 — `9e89719` fix(docker): DB credentials and Mongo auth in compose (M12)**
+  - `compose.yaml` no longer contains database passwords. Mongo and Postgres read them from gitignored `docker/mongo.env` and `docker/postgres.env`; the templates are owned by the `db-*` modules.
+  - Mongo runs with authentication. The api connects as a `readWrite`-only `app` user, created by `docker/mongo/init/01-app-user.js`.
+  - The Postgres app role password comes from `APP_DB_PASSWORD` (`01-app-role.sh`). Dev keeps `app` in `compose.dev.yaml`.
+  - `docker:smoke` generates the credentials and checks that unauthenticated or default-password access is refused (`DB_AUTH`).
+- **10:49, 10:58 — `84cfb28`, `b2e8da0` fix(api): the migrator redacts credentials in error output** — `scheme://user:pass@` becomes `scheme://[REDACTED]@`, including passwords with an unencoded `/` or `@`.
+
+### Added
+
+- **10:49 — `800a0fb` docs: `SECURITY.md`** — how to report, supported versions, secure defaults, blocking severities and the exception table (EXC-2026-1: Debian OS HIGHs, per ADR-0012). README and `apps/api/AGENTS.md` document the database env files. M13 notes that its ADR becomes 0013.
+
 ## [0.11.0] - 2026-11-25
 
 ### Added
