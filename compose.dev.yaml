@@ -18,10 +18,11 @@ services:
     image: postgres:17
     environment:
       # Superuser is for provisioning only; the app connects as the `app` role
-      # created by docker/postgres/init/01-app-role.sql (NOSUPERUSER).
+      # created by docker/postgres/init/01-app-role.sh (NOSUPERUSER).
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: app
+      APP_DB_PASSWORD: app
     ports:
       - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
     volumes:

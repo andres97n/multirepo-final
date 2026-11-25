@@ -53,6 +53,13 @@ async function http(url) {
   }
 }
 
+const passwords = new Map();
+
+function passwordFor(name) {
+  if (!passwords.has(name)) passwords.set(name, randomBytes(24).toString('base64url'));
+  return passwords.get(name);
+}
+
 function renderEnv(file, overrides) {
   return fs
     .readFileSync(file, 'utf8')
@@ -60,6 +67,8 @@ function renderEnv(file, overrides) {
     .map((line) => {
       const secret = /^(\w*_SECRET)=$/.exec(line);
       if (secret) return `${secret[1]}=${randomBytes(48).toString('base64url')}`;
+      const password = /^(\w*_PASSWORD)=$/.exec(line);
+      if (password) return `${password[1]}=${passwordFor(password[1])}`;
       const key = Object.keys(overrides).find((k) => line.startsWith(`${k}=`));
       return key ? `${key}=${overrides[key]}` : line;
     })
@@ -98,7 +107,44 @@ function postgresSteps() {
   record('MIGRATE', true, 'applied twice, exit 0');
 }
 
-async function runChecks(imageIds) {
+function dbAuthCheck(services) {
+  const details = [];
+  let ok = true;
+  if (services.includes('mongo')) {
+    const r = compose([
+      'exec',
+      '-T',
+      'mongo',
+      'mongosh',
+      '--quiet',
+      '--eval',
+      "db.getSiblingDB('app').getCollectionNames()",
+    ]);
+    // Must be refused for missing auth, not fail for another reason.
+    const refused = r.code !== 0 && /requires authentication|Unauthorized/i.test(r.out + r.err);
+    ok = ok && refused;
+    details.push(`mongo exit ${r.code}${refused ? ' auth refused' : ''}`);
+  }
+  if (services.includes('postgres')) {
+    // The image's pg_hba trusts 127.0.0.1, so probe over the container address (scram-sha-256).
+    const r = compose([
+      'exec',
+      '-T',
+      '-e',
+      'PGPASSWORD=app',
+      'postgres',
+      'sh',
+      '-c',
+      'psql -h "$(hostname -i | cut -d" " -f1)" -U app -d app -c "select 1"',
+    ]);
+    const refused = r.code !== 0 && /password authentication failed/i.test(r.out + r.err);
+    ok = ok && refused;
+    details.push(`postgres exit ${r.code}${refused ? ' auth refused' : ''}`);
+  }
+  record('DB_AUTH', ok && details.length > 0, details.join(', ') || 'no database service');
+}
+
+async function runChecks(imageIds, services) {
   const live = await http(`${API}/api/v1/health/live`);
   record('API_LIVE', live.status === 200, `status ${live.status}`);
 
@@ -157,6 +203,8 @@ async function runChecks(imageIds) {
       findings.slice(0, 5).join(', ') || 'clean',
     );
   }
+
+  dbAuthCheck(services);
 }
 
 function sigtermCheck() {
@@ -220,12 +268,27 @@ async function main() {
     const webEnv = path.join(tmp, 'web.env');
     fs.writeFileSync(
       apiEnv,
-      renderEnv(path.join('docker', 'api.env.example'), { CORS_ORIGIN: APP_ORIGIN }),
+      renderEnv(path.join('docker', 'api.env.example'), {
+        CORS_ORIGIN: APP_ORIGIN,
+        MONGO_URI: `mongodb://app:${passwordFor('MONGO_APP_PASSWORD')}@mongo:27017/app`,
+        DATABASE_URL: `postgres://app:${passwordFor('APP_DB_PASSWORD')}@postgres:5432/app`,
+      }),
       { mode: 0o600 },
     );
     fs.writeFileSync(webEnv, renderEnv(path.join('docker', 'web.env.example'), { APP_ORIGIN }), {
       mode: 0o600,
     });
+    const dbEnvFiles = {};
+    for (const [name, varName] of [
+      ['mongo', 'MONGO_ENV_FILE'],
+      ['postgres', 'POSTGRES_ENV_FILE'],
+    ]) {
+      const example = path.join('docker', `${name}.env.example`);
+      if (!fs.existsSync(example)) continue;
+      const file = path.join(tmp, `${name}.env`);
+      fs.writeFileSync(file, renderEnv(example, {}), { mode: 0o600 });
+      dbEnvFiles[varName] = file;
+    }
     childEnv = {
       ...process.env,
       API_PORT: String(API_PORT),
@@ -233,6 +296,7 @@ async function main() {
       APP_ORIGIN,
       API_ENV_FILE: apiEnv,
       WEB_ENV_FILE: webEnv,
+      ...dbEnvFiles,
     };
 
     const services = compose(['config', '--services']).out.split(/\s+/).filter(Boolean);
@@ -255,7 +319,7 @@ async function main() {
       imageIds[svc] = run('docker', ['inspect', '-f', '{{.Image}}', cid]).out.trim();
     }
 
-    await runChecks(imageIds);
+    await runChecks(imageIds, services);
     const imageSizes = sizes(imageIds);
     sigtermCheck();
 
