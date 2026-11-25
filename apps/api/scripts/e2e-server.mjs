@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 
 // @module:db-postgres
 import { execFileSync, execSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 // @end-module:db-postgres
 // @module:db-mongo
 import { MongoMemoryServer } from 'mongodb-memory-server';

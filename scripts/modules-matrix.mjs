@@ -45,7 +45,18 @@ function runCombo({ label, args }) {
     sh('git', ['worktree', 'add', '--detach', dir], REPO_ROOT);
     sh('node', ['scripts/modules.mjs', 'apply', ...args], dir);
     sh('node', ['scripts/modules.mjs', 'check'], dir);
-    for (const gate of GATES) sh('pnpm', gate, dir, { ...process.env, CI: '1' });
+    // Every gate runs so one pass reports all failures; Playwright needs a build.
+    const failed = [];
+    for (const gate of GATES) {
+      if (gate[0] === 'test:e2e:web' && failed.includes('build')) continue;
+      try {
+        sh('pnpm', gate, dir, { ...process.env, CI: '1' });
+      } catch {
+        failed.push(gate[0]);
+        if (gate[0] === 'install') break;
+      }
+    }
+    if (failed.length > 0) throw new Error(`gates failed: ${failed.join(', ')}`);
     return true;
   } catch (err) {
     process.stderr.write(`combo ${label} failed: ${err.message}\n`);
