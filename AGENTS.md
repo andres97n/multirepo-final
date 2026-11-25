@@ -96,7 +96,7 @@ multirepo-final/
 ├─ modules.json                 module manifest: paths, deps, env, markers, docs, requires/conflicts
 ├─ perf-budgets.json · lighthouserc.json   performance budgets
 ├─ compose.dev.yaml · compose.yaml          dev services (mongo, postgres) / prod-like stack (ADR-0012)
-├─ docker/                      postgres/init (non-superuser app role) · {api,web}.env.example for compose.yaml
+├─ docker/                      {postgres,mongo}/init (least-privilege app users) · {api,web,mongo,postgres}.env.example for compose.yaml
 ├─ scripts/docker-smoke.mjs     pnpm docker:smoke (build, run, check, tear down)
 ├─ .github/workflows/ci.yml     calls the reusable workflows in platform-config
 ├─ renovate.json                thin config extending the platform-config preset
