@@ -1,0 +1,51 @@
+{
+  "modules": [
+    {
+      "name": "db-mongo",
+      "kind": "db",
+      "group": "db",
+      "default": true,
+      "description": "Mongo adapter",
+      "paths": ["api/src/db/mongo"],
+      "markers": ["api/src/app.ts", "api/.env.example", "compose.dev.yaml"],
+      "deps": { "api": ["mongoose"] },
+      "env": ["MONGO_URI"],
+      "compose": ["mongo"],
+      "docs": [],
+      "requires": [],
+      "conflicts": ["db-postgres"]
+    },
+    {
+      "name": "db-postgres",
+      "kind": "db",
+      "group": "db",
+      "default": false,
+      "description": "Postgres adapter",
+      "paths": ["api/src/db/postgres"],
+      "markers": ["api/src/app.ts", "api/.env.example", "compose.dev.yaml"],
+      "deps": { "api": ["drizzle-orm", "pg"] },
+      "env": ["DATABASE_URL"],
+      "compose": ["postgres"],
+      "docs": [],
+      "requires": [],
+      "conflicts": ["db-mongo"]
+    },
+    {
+      "name": "auth",
+      "kind": "optional",
+      "group": "auth",
+      "default": true,
+      "description": "Auth module",
+      "paths": ["api/src/auth", "web/src/auth-page"],
+      "markers": ["api/src/app.ts", "web/src/proxy.ts"],
+      "deps": { "api": ["@nestjs/jwt"], "web": ["jose"] },
+      "env": ["JWT_SECRET", "SESSION_SECRET"],
+      "compose": [],
+      "docs": [],
+      "requires": ["group:db"],
+      "conflicts": [],
+      "packageScripts": { "api": ["seed:admin"] },
+      "packageExports": { "@repo/contracts": ["./auth"] }
+    }
+  ]
+}

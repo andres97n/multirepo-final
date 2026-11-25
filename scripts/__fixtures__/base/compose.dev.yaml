@@ -1,0 +1,9 @@
+services:
+  # @module:db-mongo
+  mongo:
+    image: mongo:8
+  # @end-module:db-mongo
+  # @module:db-postgres
+  postgres:
+    image: postgres:17
+  # @end-module:db-postgres

@@ -1,0 +1,70 @@
+#!/usr/bin/env node
+
+/**
+ * scripts/modules-matrix.mjs — local stand-in for the M13 CI matrix (AC-M11.3).
+ *
+ * For each combo (mongo, mongo+auth, postgres, postgres+auth) it creates a
+ * detached git worktree of HEAD, runs `modules.mjs apply`, then the gates:
+ * install (lockfile re-resolved, since pruned deps change it), lint,
+ * typecheck, test, build and the matching Playwright project. Postgres combos
+ * need Docker. The worktree is always removed.
+ *
+ * It tests the COMMITTED tree (HEAD), not uncommitted changes.
+ * Usage: pnpm modules:matrix [label ...]   e.g. `pnpm modules:matrix postgres`
+ */
+
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import process from 'node:process';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const COMBOS = [
+  { label: 'mongo', args: ['--db=mongo', '--without=auth'] },
+  { label: 'mongo+auth', args: ['--db=mongo'] },
+  { label: 'postgres', args: ['--db=postgres', '--without=auth'] },
+  { label: 'postgres+auth', args: ['--db=postgres'] },
+];
+const GATES = [
+  ['install', '--no-frozen-lockfile'],
+  ['lint'],
+  ['typecheck'],
+  ['test'],
+  ['build'],
+  ['test:e2e:web'],
+];
+
+const sh = (cmd, args, cwd, env = process.env) =>
+  execFileSync(cmd, args, { cwd, env, stdio: 'inherit', shell: process.platform === 'win32' });
+
+function runCombo({ label, args }) {
+  const dir = mkdtempSync(join(tmpdir(), `modules-matrix-${label.replace('+', '-')}-`));
+  try {
+    sh('git', ['worktree', 'add', '--detach', dir], REPO_ROOT);
+    sh('node', ['scripts/modules.mjs', 'apply', ...args], dir);
+    sh('node', ['scripts/modules.mjs', 'check'], dir);
+    for (const gate of GATES) sh('pnpm', gate, dir, { ...process.env, CI: '1' });
+    return true;
+  } catch (err) {
+    process.stderr.write(`combo ${label} failed: ${err.message}\n`);
+    return false;
+  } finally {
+    try {
+      sh('git', ['worktree', 'remove', '--force', dir], REPO_ROOT);
+    } catch {
+      rmSync(dir, { recursive: true, force: true });
+      sh('git', ['worktree', 'prune'], REPO_ROOT);
+    }
+  }
+}
+
+const only = process.argv.slice(2);
+const results = COMBOS.filter((c) => only.length === 0 || only.includes(c.label)).map((c) => ({
+  label: c.label,
+  ok: runCombo(c),
+}));
+process.stdout.write('\nmatrix summary\n');
+for (const r of results) process.stdout.write(`  ${r.ok ? 'PASS' : 'FAIL'}  ${r.label}\n`);
+process.exit(results.every((r) => r.ok) ? 0 : 1);

@@ -14,7 +14,9 @@ export default defineConfig({
   ],
   test: {
     include: ['test/**/*.e2e-spec.ts'],
+    // @module:db-mongo
     globalSetup: ['./test/global-setup.ts'],
+    // @end-module:db-mongo
     fileParallelism: false,
     testTimeout: 30000,
     hookTimeout: 120000,

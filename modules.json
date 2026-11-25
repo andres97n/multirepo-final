@@ -1,0 +1,160 @@
+{
+  "modules": [
+    {
+      "name": "db-mongo",
+      "kind": "db",
+      "group": "db",
+      "default": true,
+      "description": "Mongoose adapter for infra/database. The default database engine.",
+      "paths": [
+        "apps/api/src/infra/database/mongo",
+        "apps/api/src/modules/auth/mongo",
+        "apps/api/test/auth.e2e-spec.ts",
+        "apps/api/test/global-setup.ts"
+      ],
+      "markers": [
+        "apps/api/src/app.module.ts",
+        "apps/api/src/config/env.schema.ts",
+        "apps/api/.env.example",
+        "apps/api/vitest.e2e.config.mts",
+        "apps/api/scripts/e2e-server.mjs",
+        "compose.dev.yaml",
+        "apps/api/src/modules/auth/auth.module.ts"
+      ],
+      "deps": {
+        "api": ["mongoose"],
+        "api:dev": ["mongodb-memory-server"]
+      },
+      "env": ["MONGO_URI", "MONGO_TIMEOUT_MS"],
+      "compose": ["mongo"],
+      "docs": ["AGENTS.md", "apps/api/AGENTS.md"],
+      "requires": [],
+      "conflicts": ["db-postgres"],
+      "packageScripts": {
+        "api": ["db:sync-indexes"]
+      }
+    },
+    {
+      "name": "db-postgres",
+      "kind": "db",
+      "group": "db",
+      "default": false,
+      "description": "Drizzle + pg adapter for infra/database. Optional alternative to db-mongo.",
+      "paths": [
+        "apps/api/src/infra/database/postgres",
+        "apps/api/migrations",
+        "apps/api/drizzle.config.ts",
+        "apps/api/src/modules/auth/postgres",
+        "apps/api/test/auth-postgres.e2e-spec.ts"
+      ],
+      "markers": [
+        "apps/api/src/app.module.ts",
+        "apps/api/src/config/env.schema.ts",
+        "apps/api/.env.example",
+        "apps/api/scripts/e2e-server.mjs",
+        "compose.dev.yaml",
+        "apps/api/src/modules/auth/auth.module.ts"
+      ],
+      "deps": {
+        "api": ["drizzle-orm", "pg"],
+        "api:dev": ["@electric-sql/pglite", "@types/pg", "drizzle-kit"]
+      },
+      "env": [
+        "DATABASE_URL",
+        "POSTGRES_POOL_MAX",
+        "POSTGRES_TIMEOUT_MS",
+        "POSTGRES_IDLE_TIMEOUT_MS"
+      ],
+      "compose": ["postgres"],
+      "docs": ["AGENTS.md", "apps/api/AGENTS.md"],
+      "requires": [],
+      "conflicts": ["db-mongo"],
+      "packageScripts": {
+        "api": ["db:generate", "db:migrate"]
+      }
+    },
+    {
+      "name": "auth",
+      "kind": "optional",
+      "group": "auth",
+      "default": true,
+      "description": "Local email + password auth with Argon2id, rotating refresh sessions, progressive lockout and RBAC. Reference module.",
+      "paths": [
+        "apps/api/src/modules/auth",
+        "apps/api/test/auth.e2e-spec.ts",
+        "apps/api/test/auth-postgres.e2e-spec.ts",
+        "apps/api/test/auth-suite.ts",
+        "apps/web/src/app/(auth)",
+        "apps/web/src/app/(app)/dashboard",
+        "apps/web/src/app/api/auth",
+        "apps/web/src/lib/session.ts",
+        "apps/web/src/lib/session.test.ts",
+        "apps/web/src/lib/auth-proxy.ts",
+        "apps/web/src/lib/csrf.ts",
+        "apps/web/src/lib/csrf.test.ts",
+        "apps/web/src/lib/safe-redirect.ts",
+        "apps/web/src/lib/safe-redirect.test.ts",
+        "apps/web/src/proxy-auth.test.ts",
+        "apps/web/e2e/auth",
+        "packages/contracts/src/auth"
+      ],
+      "markers": [
+        "apps/api/src/app.module.ts",
+        "apps/api/src/config/env.schema.ts",
+        "apps/api/.env.example",
+        "apps/api/vitest.config.mts",
+        "apps/api/src/infra/database/postgres/schema/index.ts",
+        "apps/web/src/proxy.ts",
+        "apps/web/src/proxy.test.ts",
+        "apps/web/src/lib/env.schema.ts",
+        "apps/web/src/lib/env.test.ts",
+        "apps/web/.env.example",
+        "apps/web/vitest.config.ts",
+        "apps/web/next.config.ts",
+        "apps/web/src/app/(public)/layout.tsx",
+        "turbo.json",
+        "packages/contracts/tsdown.config.ts"
+      ],
+      "deps": {
+        "api": ["@nestjs/jwt", "argon2"],
+        "web": ["jose"]
+      },
+      "env": [
+        "JWT_ACCESS_SECRET",
+        "JWT_ISSUER",
+        "JWT_AUDIENCE",
+        "JWT_ACCESS_TTL_SECONDS",
+        "REFRESH_IDLE_TTL_DAYS",
+        "REFRESH_FAMILY_TTL_DAYS",
+        "REFRESH_GRACE_SECONDS",
+        "ARGON2_MEMORY_COST",
+        "ARGON2_TIME_COST",
+        "ARGON2_PARALLELISM",
+        "LOCKOUT_THRESHOLD",
+        "LOCKOUT_BASE_SECONDS",
+        "LOCKOUT_MAX_SECONDS",
+        "AUTH_REVOCATION_CACHE_TTL_SECONDS",
+        "LOGIN_THROTTLE_LIMIT",
+        "LOGIN_THROTTLE_TTL_MS",
+        "SESSION_CLEANUP_INTERVAL_MINUTES",
+        "SEED_ADMIN_EMAIL",
+        "SEED_ADMIN_PASSWORD",
+        "APP_ORIGIN",
+        "SESSION_SECRET",
+        "SESSION_SECRET_PREVIOUS",
+        "SESSION_MAX_AGE_SECONDS",
+        "SESSION_REFRESH_SKEW_SECONDS"
+      ],
+      "compose": [],
+      "docs": ["AGENTS.md", "apps/api/AGENTS.md", "apps/web/AGENTS.md"],
+      "requires": ["group:db"],
+      "conflicts": [],
+      "packageScripts": {
+        "api": ["seed:admin"]
+      },
+      "packageExports": {
+        "@repo/contracts": ["./auth"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "seed:admin": "node seed.js"
+  },
+  "dependencies": {
+    "mongoose": "9.0.0",
+    "drizzle-orm": "0.45.0",
+    "pg": "8.0.0",
+    "@nestjs/jwt": "12.0.0"
+  },
+  "devDependencies": {}
+}

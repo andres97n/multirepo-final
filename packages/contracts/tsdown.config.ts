@@ -8,7 +8,9 @@ export default defineConfig({
     pagination: 'src/pagination/index.ts',
     filters: 'src/filters/index.ts',
     health: 'src/health/index.ts',
+    // @module:auth
     auth: 'src/auth/index.ts',
+    // @end-module:auth
   },
   format: ['esm', 'cjs'],
   dts: true,
