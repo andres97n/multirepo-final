@@ -64,7 +64,11 @@ function runCombo({ label, args }) {
     writeEnvFiles(dir);
     // Every gate runs so one pass reports all failures; Playwright needs a build.
     const failed = [];
-    for (const gate of GATES) {
+    // Postgres: rebuild the migration journal for the selection (as /scaffold does).
+    const gates = label.startsWith('postgres')
+      ? [GATES[0], ['--filter', 'api', 'db:generate'], ...GATES.slice(1)]
+      : GATES;
+    for (const gate of gates) {
       if (gate[0] === 'test:e2e:web' && failed.includes('build')) continue;
       try {
         sh('pnpm', gate, dir, { ...process.env, CI: '1' });

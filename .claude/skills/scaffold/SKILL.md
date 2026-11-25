@@ -60,6 +60,7 @@ or to customize the module selection (DB engine, optional modules).
 
    ```bash
    pnpm install          # updates the lockfile for the pruned deps
+   pnpm --filter api db:generate   # postgres only: rebuilds the migration journal for the selection
    pnpm lint && pnpm typecheck && pnpm test && pnpm build
    pnpm test:e2e:web     # Playwright project matching the selection (Docker for Postgres)
    ```
