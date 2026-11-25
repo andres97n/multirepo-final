@@ -146,7 +146,7 @@ TanStack Query, next-intl, Redis, OpenTelemetry and API latency smoke tests are 
 - **Inactive engine.** The non-default engine (`db-postgres`) ships fully commented out inside its regions: commented code in TS, commented `KEY=value` lines in env files. Choosing it uncomments those regions (env description comments stay comments). Its regions must contain nothing else.
 - **Manifest.** `modules.json` (schema: `modules.schema.json`) declares each module's paths, markers, deps, env, compose services, docs and requires/conflicts (`group:db` means "one module of that group").
 - **Check.** `pnpm modules:check` validates the schema and paths, checks that regions are balanced and name known modules, and flags orphan markers (a marker in a file not listed in `markers[]`). It also catches `requires` cycles and an invalid default selection, and reports `file:line` on errors. lint-staged runs it when `modules.json` or a marked file is staged.
-- **Apply.** `pnpm modules:apply --db=<mongo|postgres> [--without=auth] [--dry-run]` deletes the paths of removed modules, strips their regions and drops the marker lines of kept ones. It prunes deps, scripts and exports from each `package.json` and rewrites `modules.json` to the selection. It is idempotent. Run `pnpm install` afterwards to update the lockfile. `pnpm modules:matrix [combo]` proves the 4 combos in git worktrees of HEAD (lint, typecheck, test, build, Playwright; Docker for Postgres).
+- **Apply.** `pnpm modules:apply --db=<mongo|postgres> [--without=auth] [--dry-run]` deletes the paths of removed modules, strips their regions and drops the marker lines of kept ones. It prunes deps, scripts and exports from each `package.json` and rewrites `modules.json` to the selection. It is idempotent. Run `pnpm install` afterwards to update the lockfile. On Postgres, also run `pnpm --filter api db:generate`: generated migrations belong to the module that owns their tables, so this rebuilds the journal for the selection. It is a no-op with auth, and without auth it writes an empty journal so `db:migrate` stays valid. `pnpm modules:matrix [combo]` proves the 4 combos in git worktrees of HEAD (lint, typecheck, test, build, Playwright; Docker for Postgres).
 - **Choosing modules.** The `/scaffold` skill interviews, runs `apply` (dry-run first), generates `.env` secrets, runs the gates and writes an ADR. See ADR-0011.
 - **One engine per app.** Running both engines at once needs its own ADR. To switch engines by hand, follow the "Switching database engine" section in `apps/api/AGENTS.md`.
 
@@ -211,6 +211,7 @@ Anything that needs a running process or a real DB goes through a one-shot scrip
 
 ```bash
 bash scripts/live-check/api-health.sh postgres   # or: mongo
+bash scripts/live-check/modules-postgres.sh auth # or: no-auth — a tree pruned by modules:apply (HEAD) on real Postgres
 ```
 
 - Needs Docker running. Uses its own compose project (`lc-<task>`) and spare ports (Postgres 5433, Mongo 27018, API 3915), so unrelated containers and a local Mongo on the default ports are never touched.

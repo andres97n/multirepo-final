@@ -97,6 +97,8 @@
         "apps/web/src/lib/safe-redirect.test.ts",
         "apps/web/src/proxy-auth.test.ts",
         "apps/web/e2e/auth",
+        "apps/api/migrations/0000_outgoing_luminals.sql",
+        "apps/api/migrations/meta",
         "packages/contracts/src/auth"
       ],
       "markers": [
