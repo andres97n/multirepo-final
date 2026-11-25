@@ -100,7 +100,7 @@ multirepo-final/
 ├─ .github/workflows/ci.yml     calls the reusable workflows in platform-config
 ├─ renovate.json                thin config extending the platform-config preset
 ├─ .claude/skills/{scaffold,adr}/SKILL.md · .claude/settings.json
-├─ .opencode/ · opencode.json   OpenCode/OMO config (points to AGENTS.md + skills)
+├─ opencode.json                OpenCode/OMO permissions (AGENTS.md + .claude/skills are discovered natively)
 ├─ .husky/ · lint-staged.config.mjs · prettier.config.mjs · .editorconfig · .nvmrc · .npmrc
 ├─ AGENTS.md · CLAUDE.md · README.md · SECURITY.md · CHANGELOG.md · LICENSE
 └─ docs/
@@ -142,10 +142,22 @@ TanStack Query, next-intl, Redis, OpenTelemetry and API latency smoke tests are 
 | `db-postgres` | DB engine (exactly one)             | No      |
 | `auth`        | Optional; the reference for modules | Yes     |
 
-- **Markers.** A module's code in shared files (app.module, env schema, `.env.example`, compose) lives only inside its `@module:<name>` … `@end-module:<name>` regions. A spec checks that the regions are balanced.
-- **Manifest.** `modules.json` declares each module's paths, dependencies, env vars, markers, docs and requires/conflicts.
-- **Choosing modules.** The `/scaffold` skill asks which engine and modules to keep, then runs `scripts/modules.mjs apply`. That step strips marker regions, deletes paths and updates deps, env and compose. It then writes an ADR. `pnpm modules:check` validates the manifest.
+- **Markers.** A module's code in shared files lives only inside whole-line regions: `// @module:<name>` … `// @end-module:<name>` in TS/JS (and JSONC such as `turbo.json`), `# @module:<name>` … `# @end-module:<name>` in YAML/env. Regions may nest. Plain JSON (`package.json`) has no comments, so the manifest's `deps`, `packageScripts` and `packageExports` cover it.
+- **Inactive engine.** The non-default engine (`db-postgres`) ships fully commented out inside its regions: commented code in TS, commented `KEY=value` lines in env files. Choosing it uncomments those regions (env description comments stay comments). Its regions must contain nothing else.
+- **Manifest.** `modules.json` (schema: `modules.schema.json`) declares each module's paths, markers, deps, env, compose services, docs and requires/conflicts (`group:db` means "one module of that group").
+- **Check.** `pnpm modules:check` validates the schema and paths, checks that regions are balanced and name known modules, and flags orphan markers (a marker in a file not listed in `markers[]`). It also catches `requires` cycles and an invalid default selection, and reports `file:line` on errors. lint-staged runs it when `modules.json` or a marked file is staged.
+- **Apply.** `pnpm modules:apply --db=<mongo|postgres> [--without=auth] [--dry-run]` deletes the paths of removed modules, strips their regions and drops the marker lines of kept ones. It prunes deps, scripts and exports from each `package.json` and rewrites `modules.json` to the selection. It is idempotent. Run `pnpm install` afterwards to update the lockfile. `pnpm modules:matrix [combo]` proves the 4 combos in git worktrees of HEAD (lint, typecheck, test, build, Playwright; Docker for Postgres).
+- **Choosing modules.** The `/scaffold` skill interviews, runs `apply` (dry-run first), generates `.env` secrets, runs the gates and writes an ADR. See ADR-0011.
 - **One engine per app.** Running both engines at once needs its own ADR. To switch engines by hand, follow the "Switching database engine" section in `apps/api/AGENTS.md`.
+
+### Adding an optional module (checklist; `auth` is the reference)
+
+1. Put the module's own code in its own folders (`apps/api/src/modules/<name>`, web route groups, `packages/contracts/src/<name>`) and list them in `paths`. Per-engine code goes in `<name>/mongo` and `<name>/postgres`, and those folders are also listed under the matching `db-*` module's `paths`.
+2. Wrap every touchpoint in a shared file in `@module:<name>` regions: the `app.module.ts` import and wiring, the env fragment in `env.schema.ts`, `.env.example`, compose services, vitest coverage globs, `turbo.json` env, web `proxy.ts` and env schema, and contracts `tsdown.config.ts`. List each file in `markers`.
+3. Add the entry to `modules.json`: `kind: "optional"`, `deps` per workspace (`"<ws>:dev"` for devDependencies), `env`, `compose`, `docs`, `requires` (`["group:db"]` if it persists data) and `conflicts`.
+4. Run `pnpm modules:check`, then `pnpm modules:apply --db=mongo --without=<name> --dry-run` and read the summary.
+5. Commit, then run `pnpm modules:matrix` (all combos must pass, with and without the module).
+6. Document the module in the nested `AGENTS.md` files and record the decision in an ADR.
 
 ## Key behaviours
 
@@ -246,7 +258,7 @@ bash scripts/live-check/api-health.sh postgres   # or: mongo
 | M08 | Web core                                | Done        |
 | M09 | Web auth (BFF)                          | Done        |
 | M10 | Playwright                              | Done        |
-| M11 | Module system + skills (`modules.json`) | Not started |
+| M11 | Module system + skills (`modules.json`) | In progress |
 | M12 | Docker                                  | Not started |
 | M13 | platform-config + CI                    | Not started |
 | M14 | Perf budgets                            | Not started |

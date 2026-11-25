@@ -120,7 +120,7 @@ Each milestone has its own file in [`milestones/`](./milestones/). The file hold
 | M08 | [Web core](./milestones/M08-web-core.md)                       | M03, M07      | Done        | Next app with env, typed api client, errors, headers and CSP                      |
 | M09 | [Web auth (BFF)](./milestones/M09-web-auth.md)                 | M06, M08      | Done        | Encrypted cookie session, proxy protection/refresh, CSRF                          |
 | M10 | [Playwright](./milestones/M10-playwright.md)                   | M09           | Done        | Prod-build browser smoke, auth / no-auth projects                                 |
-| M11 | [Module system + skills](./milestones/M11-module-system.md)    | M06, M09, M10 | Not started | `modules.json`, prune script, scaffold + adr skills, OpenCode config              |
+| M11 | [Module system + skills](./milestones/M11-module-system.md)    | M06, M09, M10 | In progress | `modules.json`, prune script, scaffold + adr skills, OpenCode config              |
 | M12 | [Docker](./milestones/M12-docker.md)                           | M11           | Not started | turbo-prune images, non-root, compose dev + prod-like                             |
 | M13 | [platform-config + CI](./milestones/M13-platform-config-ci.md) | M11, M12      | Not started | Central Renovate presets + reusable workflows, module matrix                      |
 | M14 | [Perf budgets](./milestones/M14-perf-budgets.md)               | M12, M13      | Not started | Baseline, per-route JS, LHCI, image size budgets                                  |
