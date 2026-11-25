@@ -35,12 +35,17 @@ export default async function proxy(request: NextRequest): Promise<NextResponse>
 
   // `Set-Cookie` values for the continued response (auth refresh rotation).
   const pendingCookies: string[] = [];
-  // @module:auth
-  const authRedirect = await authProxy(request, requestHeaders, pendingCookies);
-  if (authRedirect !== null) {
-    return authRedirect;
+  // Module guards may short-circuit with a redirect. A list (not a bare await)
+  // keeps this function valid when `modules:apply` removes every guard.
+  const guards: Promise<NextResponse | null>[] = [
+    // @module:auth
+    authProxy(request, requestHeaders, pendingCookies),
+    // @end-module:auth
+  ];
+  const redirect = (await Promise.all(guards)).find((result) => result !== null);
+  if (redirect) {
+    return redirect;
   }
-  // @end-module:auth
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set('content-security-policy', csp);

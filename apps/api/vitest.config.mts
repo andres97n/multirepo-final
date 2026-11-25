@@ -23,7 +23,9 @@ export default defineConfig({
         'src/common/**/*.ts',
         'src/config/**/*.ts',
         'src/infra/database/**/*.ts',
+        // @module:auth
         'src/modules/auth/**/*.ts',
+        // @end-module:auth
       ],
       exclude: [
         'src/**/*.spec.ts',
@@ -36,8 +38,10 @@ export default defineConfig({
       thresholds: {
         lines: 80,
         'src/infra/database/**': { lines: 85 },
+        // @module:auth
         // Security-critical module (AC-M06.18); services land in slice 2.
         'src/modules/auth/**': { lines: 90 },
+        // @end-module:auth
       },
     },
   },

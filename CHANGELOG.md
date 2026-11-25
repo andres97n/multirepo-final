@@ -2,6 +2,27 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.10.0] - 2026-11-24
+
+### Added
+
+- **21:18 — `90666bb` feat(repo): module manifest and pruning script (M11, architecture)**
+  - `modules.json` + `modules.schema.json` describe `db-mongo`, `db-postgres` and `auth`: paths, markers, deps, env, compose, requires/conflicts.
+  - `pnpm modules:check` validates the schema, paths and marker balance and flags orphan markers, `requires` cycles and invalid default selections (`file:line` errors). lint-staged runs it when a marked file is staged.
+  - `pnpm modules:apply --db=<mongo|postgres> [--without=auth] [--dry-run]` deletes paths, strips regions (also JSX `{/* @module */}`), uncomments the chosen non-default engine, prunes `package.json` deps, scripts and exports, and rewrites the manifest. Idempotent; stdlib only.
+  - `pnpm modules:matrix [combo]` runs the 4 combos in git worktrees through every gate and Playwright.
+- **21:18 — `ae3cfb5` feat(agents): `scaffold` and `adr` skills (M11, tooling)** — the interview, apply, `.env` secrets written without printing them, gates and ADR; the next-number ADR with two-way supersede links. OpenCode discovers both natively.
+- **21:18 — `1365f6d`, `bb40658` docs: ADR-0011 and the AGENTS.md Modules section** (marker convention, inactive engine, add-a-module checklist); M11 is done.
+
+### Changed
+
+- **21:18 — `f98387c` build(repo): `lint` and `typecheck` depend on `^build` (tooling)** — a fresh clone failed type-aware lint before `@repo/contracts` was built.
+- The M04 `db-mongo.markers.spec.ts` is removed; `modules:check` covers every module.
+
+### Fixed
+
+- **21:18 — `90ff1af`, `1eb4ea1`, `91c2c96` fix(repo): pruned trees stay green** — JSX marker regions, `e2e-server.mjs` imports per engine, `proxy.ts` stays valid without auth, the Mongo-only env spec is marked, and the matrix writes local env files.
+
 ## [0.9.0] - 2026-11-24
 
 ### Added

@@ -22,6 +22,11 @@
     "test:e2e:web:ui": "pnpm --filter web exec playwright install chromium && turbo run build --filter=api... --filter=\"web^...\" && pnpm --filter web test:e2e:web:ui",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "modules:check": "node scripts/modules.mjs check",
+    "modules:apply": "node scripts/modules.mjs apply",
+    "modules:list": "node scripts/modules.mjs list",
+    "modules:matrix": "node scripts/modules-matrix.mjs",
+    "test:scripts": "node --test \"scripts/*.test.mjs\"",
     "prepare": "husky"
   },
   "devDependencies": {

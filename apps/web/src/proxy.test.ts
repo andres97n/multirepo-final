@@ -5,10 +5,12 @@ vi.mock('./lib/env', () => ({
   env: {
     API_URL: 'http://localhost:3001',
     API_TIMEOUT_MS: 5000,
+    // @module:auth
     APP_ORIGIN: 'http://localhost:3000',
     SESSION_SECRET: 'proxy-test-secret-0123456789abcdefghijk',
     SESSION_MAX_AGE_SECONDS: 3600,
     SESSION_REFRESH_SKEW_SECONDS: 60,
+    // @end-module:auth
   },
 }));
 

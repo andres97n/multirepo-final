@@ -59,6 +59,7 @@ describe('env schema', () => {
     expect(result.success).toBe(false);
   });
 
+  // @module:db-mongo
   it('requires MONGO_URI in production but not in development', () => {
     const prod = {
       NODE_ENV: 'production',
@@ -76,6 +77,7 @@ describe('env schema', () => {
     );
     expect(envSchema.safeParse({ NODE_ENV: 'development' }).success).toBe(true);
   });
+  // @end-module:db-mongo
 
   it('accepts a valid secret in production', () => {
     const schema = composeEnvSchema(coreEnvFragment, z.object({ MY_SECRET: z.string() }));

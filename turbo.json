@@ -20,8 +20,8 @@
         "CSP_REPORT_URI"
       ]
     },
-    "lint": { "dependsOn": ["^lint"], "outputs": [] },
-    "typecheck": { "dependsOn": ["^typecheck"], "outputs": [] },
+    "lint": { "dependsOn": ["^build"], "outputs": [] },
+    "typecheck": { "dependsOn": ["^build"], "outputs": [] },
     "test": {
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"],
