@@ -10,7 +10,9 @@
         "apps/api/src/infra/database/mongo",
         "apps/api/src/modules/auth/mongo",
         "apps/api/test/auth.e2e-spec.ts",
-        "apps/api/test/global-setup.ts"
+        "apps/api/test/global-setup.ts",
+        "docker/mongo",
+        "docker/mongo.env.example"
       ],
       "markers": [
         "apps/api/src/app.module.ts",
@@ -48,7 +50,9 @@
         "apps/api/migrations",
         "apps/api/drizzle.config.ts",
         "apps/api/src/modules/auth/postgres",
-        "apps/api/test/auth-postgres.e2e-spec.ts"
+        "apps/api/test/auth-postgres.e2e-spec.ts",
+        "docker/postgres",
+        "docker/postgres.env.example"
       ],
       "markers": [
         "apps/api/src/app.module.ts",

@@ -7,6 +7,8 @@
 | PRD refs   | NFR-SEC-4, NFR-SEC-5, NFR-SEC-6, NFR-MAINT-1, NFR-MAINT-2, NFR-QUAL-1, NFR-QUAL-2, §9 acceptance (1, 2, 4, 5) |
 | Axes       | 4 (Quality), 5 (Security), 6 (Infra), cross-cutting maintenance                                               |
 
+> Numbering note: ADR-0012 is taken by M12 (Docker), so this milestone's ADR becomes **ADR-0013**. `SECURITY.md` already exists as a draft from M12 (reporting, blocking severities, exception table); this milestone extends it with `.security/exceptions.yaml` and CI enforcement.
+
 ## Goal
 
 A central `andres97n/platform-config` repo holds the Renovate presets and reusable GitHub workflows, versioned by tag. The boilerplate (and every child) has a thin `renovate.json` and a thin `ci.yml` pinned to those versions, including the module matrix.

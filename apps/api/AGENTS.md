@@ -77,6 +77,8 @@ logs, baseline security middleware and the database ports + Mongo adapter.
 3. `build` — `turbo run build --filter=api`, then `pnpm --filter=api deploy --prod --legacy /prod/api` (`package.json#files` = `dist`, `migrations`).
 4. `runtime` — `node:24-trixie-slim` by digest, npm/corepack/yarn removed, `USER node`, `HEALTHCHECK` on `/api/v1/health/live`, `node dist/main.js`.
 
+Database credentials in Docker come from gitignored `docker/mongo.env` / `docker/postgres.env` (templates `*.env.example`, owned by the `db-*` modules). Init scripts create the `app` user: `docker/mongo/init/01-app-user.js` (readWrite on db `app`; root user set, so Mongo runs with `--auth`) and `docker/postgres/init/01-app-role.sh` (NOSUPERUSER, password from `APP_DB_PASSWORD`, set to `app` in `compose.dev.yaml` for local dev). The passwords in `MONGO_URI` / `DATABASE_URL` must match these files. The migrator masks `//user:pass@` in its error output.
+
 Postgres migrations in a container: `docker compose run --rm api node dist/infra/database/postgres/migrate.js` (`migrate.ts`, explicit deploy step). Shutdown logs `shutting down (SIGTERM)` after the DB connections close (`infra/logger/logger.module.ts`).
 
 ## Switching database engine
