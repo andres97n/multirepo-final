@@ -351,6 +351,38 @@ describe('modules.mjs apply', () => {
     }
   });
 
+  it('strips JSX marker regions in .tsx files', () => {
+    const root = makeTempFixture();
+    try {
+      const page = join(root, 'web/src/page.tsx');
+      writeFileSync(
+        page,
+        [
+          'export const Page = () => (',
+          '  <main>',
+          '    {/* @module:auth */}',
+          '    <nav />',
+          '    {/* @end-module:auth */}',
+          '  </main>',
+          ');',
+          '',
+        ].join('\n'),
+      );
+      const manifestPath = join(root, 'modules.json');
+      const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+      manifest.modules.find((m) => m.name === 'auth').markers.push('web/src/page.tsx');
+      writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+      assert.equal(run(root, ['check']).code, 0);
+      assert.equal(run(root, ['apply', '--db=mongo', '--without=auth']).code, 0);
+      assert.equal(
+        readFileSync(page, 'utf8'),
+        'export const Page = () => (\n  <main>\n  </main>\n);\n',
+      );
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
   it('rejects unknown and missing arguments', () => {
     const root = makeTempFixture();
     try {

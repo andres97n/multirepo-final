@@ -164,27 +164,19 @@ function parseMarkerRegions(text, filePath) {
   /** @type {Array<{ module: string, line: number }>} */
   const stack = [];
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const trimmed = line.trim();
-    // Check for start marker (not end)
-    const startMatch = trimmed.match(
-      new RegExp(`^${escapeRegex(prefix)}\\s*@module:([a-z][a-z0-9-]*)\\s*$`),
-    );
-    const endMatch = trimmed.match(
-      new RegExp(`^${escapeRegex(prefix)}\\s*@end-module:([a-z][a-z0-9-]*)\\s*$`),
-    );
-    if (startMatch && !endMatch) {
-      stack.push({ module: startMatch[1], line: i + 1 });
-    } else if (endMatch) {
+    const marker = matchMarker(lines[i], prefix);
+    if (marker && !marker.end) {
+      stack.push({ module: marker.module, line: i + 1 });
+    } else if (marker) {
       if (stack.length === 0) {
         throw new Error(
-          `${filePath}:${String(i + 1)}: end-module:${endMatch[1]} without matching start`,
+          `${filePath}:${String(i + 1)}: end-module:${marker.module} without matching start`,
         );
       }
       const top = stack.pop();
-      if (top.module !== endMatch[1]) {
+      if (top.module !== marker.module) {
         throw new Error(
-          `${filePath}:${String(i + 1)}: end-module:${endMatch[1]} does not match open module:${top.module} at line ${String(top.line)}`,
+          `${filePath}:${String(i + 1)}: end-module:${marker.module} does not match open module:${top.module} at line ${String(top.line)}`,
         );
       }
       regions.push({ module: top.module, startLine: top.line, endLine: i + 1 });
@@ -226,8 +218,8 @@ function findMarkerLines(root) {
       readFileSync(abs, 'utf8')
         .split(/\r?\n/)
         .forEach((text, i) => {
-          const m = text.match(/^\s*(?:\/\/|#)\s*@(?:end-)?module:([a-z][a-z0-9-]*)\s*$/);
-          if (m) found.push({ file, line: i + 1, module: m[1] });
+          const m = matchMarker(text, commentPrefix(file));
+          if (m) found.push({ file, line: i + 1, module: m.module });
         });
     }
   };
@@ -254,8 +246,17 @@ function findRequiresCycle(modules) {
   return null;
 }
 
-function escapeRegex(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const MARKER_LINE = {
+  '#': /^\s*#\s*@(end-)?module:([a-z][a-z0-9-]*)\s*$/,
+  '//': /^\s*\/\/\s*@(end-)?module:([a-z][a-z0-9-]*)\s*$/,
+  jsx: /^\s*\{\/\*\s*@(end-)?module:([a-z][a-z0-9-]*)\s*\*\/\}\s*$/,
+};
+
+/** A whole-line marker → `{ end, module }`, else null. `//` files also accept the JSX comment form. */
+function matchMarker(line, prefix) {
+  const m =
+    line.match(MARKER_LINE[prefix]) ?? (prefix === '//' ? line.match(MARKER_LINE.jsx) : null);
+  return m ? { end: Boolean(m[1]), module: m[2] } : null;
 }
 
 // ─── Commands ────────────────────────────────────────────────────────────────
@@ -497,19 +498,17 @@ function validateSelection(manifest, selected) {
  */
 function stripMarkers(text, filePath, removedModules, enabledModules = new Set()) {
   const prefix = commentPrefix(filePath);
-  const startRe = new RegExp(`^\\s*${escapeRegex(prefix)}\\s*@module:([a-z][a-z0-9-]*)\\s*$`);
-  const endRe = new RegExp(`^\\s*${escapeRegex(prefix)}\\s*@end-module:([a-z][a-z0-9-]*)\\s*$`);
   const out = [];
   /** Open regions, innermost last: { module, lines } (lines buffered for kept regions). */
   const stack = [];
   const removing = () => stack.some((r) => removedModules.has(r.module));
   for (const line of text.split(/\r?\n/)) {
-    const start = line.match(startRe);
-    if (start) {
-      stack.push({ module: start[1], lines: [] });
+    const marker = matchMarker(line, prefix);
+    if (marker && !marker.end) {
+      stack.push({ module: marker.module, lines: [] });
       continue;
     }
-    if (line.match(endRe)) {
+    if (marker) {
       const region = stack.pop();
       if (!removing() && !removedModules.has(region.module)) {
         const body = enabledModules.has(region.module)
