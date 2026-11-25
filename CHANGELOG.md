@@ -12,6 +12,7 @@ All notable changes to this project are documented here. Format based on [Keep a
   - The Postgres app role password comes from `APP_DB_PASSWORD` (`01-app-role.sh`). Dev keeps `app` in `compose.dev.yaml`.
   - `docker:smoke` generates the credentials and checks that unauthenticated or default-password access is refused (`DB_AUTH`).
 - **10:49, 10:58 — `84cfb28`, `b2e8da0` fix(api): the migrator redacts credentials in error output** — `scheme://user:pass@` becomes `scheme://[REDACTED]@`, including passwords with an unencoded `/` or `@`.
+- **11:02 — `770628b` fix(api): scheme-less authorities and the known password are masked too** — `//user:pass@host` is masked again (a regression in `b2e8da0`), and the password parsed from `DATABASE_URL` is replaced, raw and URL-decoded, wherever it appears.
 
 ### Added
 
