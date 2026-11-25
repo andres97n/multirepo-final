@@ -14,7 +14,8 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { randomBytes } from 'node:crypto';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import process from 'node:process';
 import { dirname, join } from 'node:path';
@@ -39,12 +40,28 @@ const GATES = [
 const sh = (cmd, args, cwd, env = process.env) =>
   execFileSync(cmd, args, { cwd, env, stdio: 'inherit', shell: process.platform === 'win32' });
 
+/** Like /scaffold: local env files from each .env.example, `*_SECRET` set to random bytes. */
+function writeEnvFiles(dir) {
+  const files = [
+    ['apps/api/.env.example', 'apps/api/.env'],
+    ['apps/web/.env.example', 'apps/web/.env.local'],
+  ];
+  for (const [example, target] of files) {
+    const text = readFileSync(join(dir, example), 'utf8').replace(
+      /^#?\s*([A-Z0-9_]*_SECRET)=.*$/gm,
+      (_, key) => `${key}=${randomBytes(48).toString('base64url')}`,
+    );
+    writeFileSync(join(dir, target), text);
+  }
+}
+
 function runCombo({ label, args }) {
   const dir = mkdtempSync(join(tmpdir(), `modules-matrix-${label.replace('+', '-')}-`));
   try {
     sh('git', ['worktree', 'add', '--detach', dir], REPO_ROOT);
     sh('node', ['scripts/modules.mjs', 'apply', ...args], dir);
     sh('node', ['scripts/modules.mjs', 'check'], dir);
+    writeEnvFiles(dir);
     // Every gate runs so one pass reports all failures; Playwright needs a build.
     const failed = [];
     for (const gate of GATES) {
