@@ -95,8 +95,9 @@ multirepo-final/
 ├─ scripts/live-check/          one-shot checks against real DBs in Docker (lib.sh, api-health.sh)
 ├─ modules.json                 module manifest: paths, deps, env, markers, docs, requires/conflicts
 ├─ perf-budgets.json · lighthouserc.json   performance budgets
-├─ compose.dev.yaml · compose.yaml          dev services (mongo, postgres) / prod-like stack
-├─ docker/                      service init files (e.g. postgres/init: non-superuser app role)
+├─ compose.dev.yaml · compose.yaml          dev services (mongo, postgres) / prod-like stack (ADR-0012)
+├─ docker/                      postgres/init (non-superuser app role) · {api,web}.env.example for compose.yaml
+├─ scripts/docker-smoke.mjs     pnpm docker:smoke (build, run, check, tear down)
 ├─ .github/workflows/ci.yml     calls the reusable workflows in platform-config
 ├─ renovate.json                thin config extending the platform-config preset
 ├─ .claude/skills/{scaffold,adr}/SKILL.md · .claude/settings.json
@@ -203,6 +204,8 @@ pnpm --filter api db:sync-indexes          # Mongo indexes (deploy step)
 pnpm --filter api db:generate | db:migrate # Postgres migrations (explicit step)
 pnpm --filter @repo/contracts build        # contracts must build before consumers
 pnpm modules:check       # validate modules.json + markers (M11)
+docker compose up -d --build --wait        # prod-like stack (compose.yaml; needs docker/{api,web}.env)
+pnpm docker:smoke        # build + run the stack, check health/non-root/leaks/SIGTERM, tear down (M12)
 ```
 
 ## Live verification (real databases in Docker)
@@ -212,6 +215,7 @@ Anything that needs a running process or a real DB goes through a one-shot scrip
 ```bash
 bash scripts/live-check/api-health.sh postgres   # or: mongo
 bash scripts/live-check/modules-postgres.sh auth # or: no-auth — a tree pruned by modules:apply (HEAD) on real Postgres
+bash scripts/live-check/docker-postgres.sh       # docker:smoke on a copy of the working tree pruned to Postgres without auth
 ```
 
 - Needs Docker running. Uses its own compose project (`lc-<task>`) and spare ports (Postgres 5433, Mongo 27018, API 3915), so unrelated containers and a local Mongo on the default ports are never touched.
@@ -260,7 +264,7 @@ bash scripts/live-check/modules-postgres.sh auth # or: no-auth — a tree pruned
 | M09 | Web auth (BFF)                          | Done        |
 | M10 | Playwright                              | Done        |
 | M11 | Module system + skills (`modules.json`) | Done        |
-| M12 | Docker                                  | Not started |
+| M12 | Docker                                  | Done        |
 | M13 | platform-config + CI                    | Not started |
 | M14 | Perf budgets                            | Not started |
 | M15 | Docs (ARCHITECTURE, RULES, FORKING)     | Not started |

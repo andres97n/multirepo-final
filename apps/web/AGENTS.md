@@ -138,6 +138,17 @@ pnpm test:e2e:web                # root: build api + deps, then Playwright on th
 pnpm test:e2e:web:ui             # root: same, in Playwright UI mode for local debugging
 ```
 
+## Docker image
+
+`Dockerfile` (build from the repo root: `docker build -f apps/web/Dockerfile .`; ADR-0012):
+
+1. `pruner` — `turbo prune web --docker`.
+2. `deps` — `pnpm fetch` + `pnpm install --offline --frozen-lockfile` (store cache mount).
+3. `build` — `turbo run build --filter=web` with build-only env: `APP_ORIGIN` (build arg, baked into `serverActions.allowedOrigins`), `API_URL=http://api:3001` and a placeholder `SESSION_SECRET` that never reaches the runtime stage.
+4. `runtime` — `node:24-trixie-slim` by digest, npm/corepack/yarn removed, `.next/standalone` + `.next/static`, `HOSTNAME=0.0.0.0`, `USER node`, `HEALTHCHECK` on `/api/health`, `node apps/web/server.js`.
+
+There is no `public/` folder; add a `COPY` for it in the runtime stage when one appears.
+
 ## Writing E2E tests
 
 - Specs live in `e2e/auth/` (auth project only), `e2e/no-auth/` (no-auth project only) and `e2e/shared/` (both). `playwright.config.ts` picks exactly one project by whether `src/app/(auth)` exists, so a spec in the wrong folder never runs in the wrong project.
