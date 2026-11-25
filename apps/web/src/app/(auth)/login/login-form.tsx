@@ -1,5 +1,8 @@
 'use client';
 
+// Must stay the first import: see lib/zod-jitless.ts.
+import '../../../lib/zod-jitless';
+
 import { LoginInput } from '@repo/contracts/auth';
 import { Button } from '@repo/ui/components/button';
 import {
@@ -12,12 +15,6 @@ import {
 import { FormField } from '@repo/ui/components/form-field';
 import { Input } from '@repo/ui/components/input';
 import * as React from 'react';
-import { z } from 'zod';
-
-// The CSP has no 'unsafe-eval': disable Zod's JIT-compiled parsers (they are
-// built with `new Function`). The handler validates again at the trust
-// boundary; this parse is UX only.
-z.config({ jitless: true });
 
 const GENERIC_ERROR = 'Unable to sign in. Please check your email and password and try again.';
 

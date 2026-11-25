@@ -85,6 +85,6 @@ describe('proxy', () => {
     expect(source).toContain('_next/image');
     expect(source).toContain('favicon');
     expect(source).toContain('about');
-    expect(source).toContain('_not-found');
+    expect(source).not.toContain('_not-found'); // dynamic: global-not-found.tsx
   });
 });

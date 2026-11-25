@@ -29,14 +29,16 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   typedRoutes: true,
-  // @module:auth
   experimental: {
+    // Unmatched URLs render app/global-not-found.tsx (per request, with a nonce).
+    globalNotFound: true,
+    // @module:auth
     // Cookie-authenticated mutations: Server Actions may only come from our
     // own origin (route handlers use lib/csrf.ts instead).
     // Next compares the origin HOST, not the full URL.
     serverActions: { allowedOrigins: [new URL(webEnv.APP_ORIGIN).host] },
+    // @end-module:auth
   },
-  // @end-module:auth
   headers() {
     return [
       {

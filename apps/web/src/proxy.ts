@@ -58,7 +58,7 @@ export default async function proxy(request: NextRequest): Promise<NextResponse>
 
 /**
  * Matcher: everything except static assets and the statically prerendered
- * pages (`/about`, `/_not-found`), which keep their static (○) rendering and
+ * pages (`/about`), which keep their static (○) rendering and
  * the `next.config.ts` headers. `missing` skips `next/link` prefetches so a
  * per-request nonce never lands in a cached prefetch response (recommended by
  * the Next 16 CSP guide) and auth redirects never hijack a prefetch. Add every
@@ -69,7 +69,7 @@ export const config = {
   matcher: [
     {
       source:
-        '/((?!_next/static|_next/image|favicon\\.ico|favicon\\.png|about/?$|_not-found/?$|.*\\.(?:png|jpg|jpeg|gif|svg|ico|webp|avif|css|js|mjs|map|txt|xml|json|woff2?|ttf|otf|eot)$).*)',
+        '/((?!_next/static|_next/image|favicon\\.ico|favicon\\.png|about/?$|.*\\.(?:png|jpg|jpeg|gif|svg|ico|webp|avif|css|js|mjs|map|txt|xml|json|woff2?|ttf|otf|eot)$).*)',
       missing: [
         { type: 'header', key: 'next-router-prefetch' },
         { type: 'header', key: 'purpose', value: 'prefetch' },
