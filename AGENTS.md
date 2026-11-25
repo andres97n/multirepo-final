@@ -245,7 +245,7 @@ bash scripts/live-check/api-health.sh postgres   # or: mongo
 | M07 | packages/ui                             | Done        |
 | M08 | Web core                                | Done        |
 | M09 | Web auth (BFF)                          | Done        |
-| M10 | Playwright                              | Not started |
+| M10 | Playwright                              | Done        |
 | M11 | Module system + skills (`modules.json`) | Not started |
 | M12 | Docker                                  | Not started |
 | M13 | platform-config + CI                    | Not started |

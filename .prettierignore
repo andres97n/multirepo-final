@@ -6,3 +6,5 @@ coverage
 .turbo
 .omc
 .recall
+test-results
+playwright-report

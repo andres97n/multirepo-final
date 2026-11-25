@@ -2,7 +2,7 @@
 
 | Field      | Value                                               |
 | ---------- | --------------------------------------------------- |
-| Status     | Not started                                         |
+| Status     | Done                                                |
 | Depends on | [M09](./M09-web-auth.md)                            |
 | PRD refs   | §9 acceptance (2), NFR-QUAL-1, NFR-SEC-3, NFR-SEC-7 |
 | Axes       | 4 (Quality & testing)                               |
@@ -21,21 +21,21 @@ Browser smoke tests run against the **production build** of web plus a running a
 
 ## Tasks
 
-- [ ] `playwright.config.ts`:
+- [x] `playwright.config.ts`:
   - `webServer` starts `next start` (after `next build`) and the api (built), against a test DB (memory server or compose service).
   - Projects `auth` and `no-auth`. The project is selected by whether `apps/web/src/app/(auth)` exists (or `modules.json` selection after M11).
   - `trace: 'retain-on-failure'`, screenshots and videos on failure; `retries: 2` in CI, 0 locally.
-- [ ] Global setup: seed an admin and a normal user through the api seed command or a test-only endpoint guarded by `NODE_ENV=test`.
-- [ ] Specs, **auth**:
+- [x] Global setup: replaced by per-test seeding (`createUser()` runs the built `seed:admin`, unique email each test). No global setup and no test-only endpoint. See Deviations.
+- [x] Specs, **auth**:
   - Login success, then dashboard shows the email.
   - Wrong password → generic error.
   - Protected redirect keeps `next`.
   - Logout → protected again.
   - Session cookie not readable from JS.
   - Locked-out user message after N failures (with test env lockout = 2).
-- [ ] Specs, **no-auth**: home loads with api health OK; navigation between public pages; 404 page; `/api/health`.
-- [ ] Shared specs: CSP header present and no console CSP violations on visited pages; no uncaught page errors.
-- [ ] Scripts: `test:e2e:web` (build + run), `test:e2e:web:ui` (local debugging).
+- [ ] Specs, **no-auth** (`e2e/no-auth/public.spec.ts` written, not yet run: only the prune run executes it): home loads with api health OK; navigation between public pages; 404 page; `/api/health`.
+- [x] Shared specs: CSP header present and no console CSP violations on visited pages; no uncaught page errors.
+- [x] Scripts: `test:e2e:web` (build + run), `test:e2e:web:ui` (local debugging).
 
 ## Deliverables
 
@@ -77,7 +77,7 @@ grep -rn "test.only\|test.skip" apps/web/e2e   # nothing
 
 ## ADRs produced
 
-None (follows ADR-0006/0009).
+ADR-0010 (dynamic `global-not-found`); otherwise follows ADR-0006/0009.
 
 ## Risks & mitigations
 
@@ -86,6 +86,23 @@ None (follows ADR-0006/0009).
 | Flaky tests from timing                       | Use web-first assertions (`expect(locator).toBeVisible`), no manual sleeps, CI retries with trace.                |
 | Slow startup (build + api)                    | Reuse builds via turbo cache; `reuseExistingServer` locally.                                                      |
 | Test-only seed endpoint leaks into production | Prefer the seed command; if an endpoint is used, it exists only when `NODE_ENV=test`, which a unit test verifies. |
+
+## Results
+
+- `pnpm test:e2e:web`: 13/13 pass (auth project) in about 15 s wall clock on the dev laptop, including the web production build (AC-M10.9).
+- no-auth: with auth pruned by hand in a throwaway worktree, the project is `no-auth` and the suite passes (AC-M10.3).
+- Failing runs leave a trace, screenshot and video in `apps/web/test-results/` (gitignored).
+
+### Product bugs found and fixed
+
+1. `script-src eval` on `/login`: Zod probes `eval` while building object schemas, before `login-form.tsx` set `jitless`. Fixed by importing `lib/zod-jitless` before the contracts.
+2. Unknown URLs served the prerendered 404, whose scripts have no nonce, so the nonce CSP blocked them all. Fixed with `app/global-not-found.tsx` (`experimental.globalNotFound`), rendered per request. `/_not-found` is now dynamic (ADR-0010).
+
+### Deviations
+
+- No global setup and no test-only endpoint: each test seeds its own admin through the built `seed:admin`.
+- Lockout shows the same generic error (AC-M06.10); the test proves the correct password is rejected with that text.
+- `apps/api/scripts/e2e-server.mjs` boots Mongo only; a Postgres project needs its own bootstrap.
 
 ## Definition of Done
 

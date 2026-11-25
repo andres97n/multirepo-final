@@ -40,10 +40,15 @@ Rules:
 - Static routes stay static (○). They get the nonce-less policy with the
   documented `script-src 'self' 'unsafe-inline'` fallback (Next emits inline
   scripts on prerendered pages; see `src/lib/csp.ts` and ADR-0008).
+- Unknown URLs render `app/global-not-found.tsx` per request (ƒ), so they get
+  the nonce (ADR-0010). Do not replace it with a catch-all route (`typedRoutes` would
+  accept any href) or make `not-found.tsx` dynamic (every page turns ƒ).
+- A client component that imports `@repo/contracts` must import
+  `lib/zod-jitless` first, or Zod probes `eval` and the CSP reports it.
 - `connect-src 'self'`: the browser never calls the API directly — all API
   traffic is server-side through `api-client.server.ts`.
 - A new STATIC page must be added to the exclusion list in `src/proxy.ts`
-  `config.matcher` (like `about`, `_not-found`); otherwise the proxy gives it a
+  `config.matcher` (like `about`); otherwise the proxy gives it a
   nonce and it silently becomes dynamic. Confirm with the `next build` route
   table (○). A dynamic page gets the nonce automatically.
 
@@ -129,7 +134,23 @@ pnpm --filter web typecheck      # strict tsc --noEmit
 pnpm --filter web test           # vitest run (node + jsdom projects)
 pnpm --filter web test:coverage  # + v8 coverage (>= 80% on src/lib)
 pnpm --filter web check:bundle   # after build: no server modules in .next/static
+pnpm test:e2e:web                # root: build api + deps, then Playwright on the production build (headless)
+pnpm test:e2e:web:ui             # root: same, in Playwright UI mode for local debugging
 ```
+
+## Writing E2E tests
+
+- Specs live in `e2e/auth/` (auth project only), `e2e/no-auth/` (no-auth project only) and `e2e/shared/` (both). `playwright.config.ts` picks exactly one project by whether `src/app/(auth)` exists, so a spec in the wrong folder never runs in the wrong project.
+- `auth/` is removed when the auth module is pruned. `shared/` and `fixtures.ts` must never import from `auth/`.
+- Import `test` and `expect` from `../fixtures` (not from `@playwright/test`). The auto `violations` fixture fails any test that causes a CSP violation or an uncaught page error.
+- Each test creates its own user with `createUser()` from `e2e/auth/users.ts` (runs the built `seed:admin`). Never share users between tests; tests must not depend on order.
+- Use `login(page, email, password)` and `GENERIC_ERROR` from `auth/users.ts` for the login form.
+- Web-first assertions only (`expect(locator).toBeVisible()`, `toHaveURL`). No `waitForTimeout`, `test.only` or `test.skip` (ESLint blocks the last two).
+- Env (ports, secrets, lockout threshold) lives in `e2e/env.ts`. The api and web servers are started by Playwright's `webServer`; never start them by hand.
+- Debug a failing test with `pnpm test:e2e:web:ui`. Failures keep a trace, screenshot and video in `apps/web/test-results/` (gitignored); open a trace with `pnpm exec playwright show-trace <trace.zip>`.
+- Firefox and WebKit are optional and not configured; the matrix is Chromium only (M10 scope).
+- One-time setup on a new machine: `pnpm --filter web exec playwright install chromium`.
+- The api side uses `apps/api/scripts/e2e-server.mjs` (MongoDB memory server). A Postgres project needs its own bootstrap there.
 
 ## Gates
 
