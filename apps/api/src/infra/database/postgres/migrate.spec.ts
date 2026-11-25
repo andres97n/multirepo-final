@@ -43,6 +43,14 @@ describe('postgres migrations', () => {
     expect(redacted).toContain('//[REDACTED]@db');
   });
 
+  it('redacts passwords with an unencoded slash or at sign', () => {
+    for (const url of ['postgres://app:pa/ss@db/app', 'postgres://app:p@ss@db/app']) {
+      expect(redactCredentials(`connect to ${url} failed`)).toBe(
+        'connect to postgres://[REDACTED]@db/app failed',
+      );
+    }
+  });
+
   it('leaves a message without credentials unchanged', () => {
     const message = 'relation "users" does not exist';
     expect(redactCredentials(message)).toBe(message);
