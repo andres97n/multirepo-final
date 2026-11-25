@@ -1,0 +1,17 @@
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+**/coverage
+**/.env*
+.git
+docs
+.tasks
+.recall
+.omc
+.claude
+.husky
+**/test-results
+**/playwright-report
+**/*.tsbuildinfo
+**/*.log

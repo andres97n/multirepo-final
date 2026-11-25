@@ -3,6 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "description": "NestJS API — validated config, contract-based validation, uniform errors, request ids, safe logging and baseline security.",
+  "files": [
+    "dist",
+    "migrations"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "dev": "node --watch -r @swc-node/register src/main.ts",

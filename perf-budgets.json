@@ -1,0 +1,15 @@
+{
+  "$comment": "Draft baseline from M12 (pnpm docker:smoke). M14 turns these into enforced budgets.",
+  "docker": {
+    "api": {
+      "baselineBytes": 451516721,
+      "baselineFsKB": 318308,
+      "targetMB": 250
+    },
+    "web": {
+      "baselineBytes": 391586271,
+      "baselineFsKB": 260932,
+      "targetMB": 200
+    }
+  }
+}

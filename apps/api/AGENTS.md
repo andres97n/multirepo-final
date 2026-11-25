@@ -68,6 +68,17 @@ logs, baseline security middleware and the database ports + Mongo adapter.
   connects as the non-superuser `app` role (`docker/postgres/init/01-app-role.sql`).
 - Real-DB proof (migrations, boot, `/health/ready` up/down/recovery): `bash scripts/live-check/api-health.sh <mongo|postgres>`; see "Live verification" in the root `AGENTS.md`.
 
+## Docker image
+
+`Dockerfile` (build from the repo root: `docker build -f apps/api/Dockerfile .`; ADR-0012):
+
+1. `pruner` — `turbo prune api --docker`.
+2. `deps` — `pnpm fetch` + `pnpm install --offline --frozen-lockfile` on the pruned manifests (store cache mount).
+3. `build` — `turbo run build --filter=api`, then `pnpm --filter=api deploy --prod --legacy /prod/api` (`package.json#files` = `dist`, `migrations`).
+4. `runtime` — `node:24-trixie-slim` by digest, npm/corepack/yarn removed, `USER node`, `HEALTHCHECK` on `/api/v1/health/live`, `node dist/main.js`.
+
+Postgres migrations in a container: `docker compose run --rm api node dist/infra/database/postgres/migrate.js` (`migrate.ts`, explicit deploy step). Shutdown logs `shutting down (SIGTERM)` after the DB connections close (`infra/logger/logger.module.ts`).
+
 ## Switching database engine
 
 Exactly one engine is wired per app. To switch Mongo → Postgres, touch only the

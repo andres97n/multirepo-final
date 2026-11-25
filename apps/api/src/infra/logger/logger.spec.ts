@@ -5,7 +5,8 @@ import { pino } from 'pino';
 import { pinoHttp } from 'pino-http';
 import { describe, expect, it } from 'vitest';
 import type { AppConfig } from '../../config/env.schema';
-import { buildPinoHttpOptions, redactConfig } from './logger.module';
+import type { Logger } from 'nestjs-pino';
+import { buildPinoHttpOptions, LoggerModule, redactConfig } from './logger.module';
 
 // Core fields only: module fragments (db-*) are optional per build.
 const baseConfig = {
@@ -134,5 +135,17 @@ describe('userId in request logs (AC-M06.15)', () => {
   it('omits userId for anonymous requests', () => {
     const line = requestLine({ id: 'req-8', method: 'GET', url: '/api/v1/health/live' });
     expect(line).not.toHaveProperty('userId');
+  });
+});
+
+describe('LoggerModule shutdown hooks', () => {
+  it('logs the shutdown signal (AC-M12.4)', () => {
+    const messages: string[] = [];
+    const logger = { log: (message: string) => messages.push(message) } as unknown as Logger;
+    const module = new LoggerModule(logger);
+
+    module.beforeApplicationShutdown('SIGTERM');
+
+    expect(messages).toEqual(['shutting down (SIGTERM)']);
   });
 });

@@ -1,5 +1,5 @@
-import { Global, Module } from '@nestjs/common';
-import { LoggerModule as PinoLoggerModule } from 'nestjs-pino';
+import { type BeforeApplicationShutdown, Global, Module } from '@nestjs/common';
+import { Logger, LoggerModule as PinoLoggerModule } from 'nestjs-pino';
 import type { IncomingMessage } from 'node:http';
 import type { DestinationStream } from 'pino';
 import type { Options } from 'pino-http';
@@ -73,4 +73,14 @@ export function buildPinoHttpOptions(config: AppConfig, stream?: DestinationStre
   ],
   exports: [PinoLoggerModule],
 })
-export class LoggerModule {}
+export class LoggerModule implements BeforeApplicationShutdown {
+  constructor(private readonly logger: Logger) {}
+
+  /**
+   * Runs after `onModuleDestroy` (DB connections already closed), before the HTTP server
+   * stops. The only shutdown line: output from `onApplicationShutdown` is lost on exit.
+   */
+  beforeApplicationShutdown(signal?: string): void {
+    this.logger.log(`shutting down (${signal ?? 'close'})`, 'Shutdown');
+  }
+}

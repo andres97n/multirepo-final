@@ -2,10 +2,12 @@
 
 | Field      | Value                                                                    |
 | ---------- | ------------------------------------------------------------------------ |
-| Status     | Not started                                                              |
+| Status     | Done                                                                     |
 | Depends on | [M11](./M11-module-system.md)                                            |
 | PRD refs   | NFR-DEP-1, NFR-DEP-2, NFR-PERF-3, NFR-SEC-7, NFR-DX-1, §9 acceptance (4) |
 | Axes       | 6 (Infrastructure & deployment)                                          |
+
+> ADR number: the decision is recorded as **ADR-0012** (`docs/adr/0012-docker-turbo-prune-compose.md`); ADR-0011 was already taken by the module manifest.
 
 ## Goal
 
@@ -21,23 +23,23 @@ Production images for api and web, built through `turbo prune`. They are small, 
 
 ## Tasks
 
-- [ ] Shared pattern for both Dockerfiles:
+- [x] Shared pattern for both Dockerfiles:
   1. `pruner`: `turbo prune <app> --docker`.
   2. `deps`: `pnpm fetch` + `pnpm install --offline --frozen-lockfile` on `out/json`, with a cache mount for the pnpm store.
   3. `build`: copy `out/full`, `turbo run build --filter=<app>`.
   4. `runtime`: minimal base, non-root user, only the production output.
-- [ ] api runtime: `pnpm deploy --prod` output (or pruned `node_modules` + `dist`), `node dist/main.js`, `HEALTHCHECK` on `/api/v1/health/live`, `NODE_ENV=production`, `tini` (or `--init`) for signal handling.
-- [ ] web runtime: Next `standalone` + `.next/static` + `public`, `node server.js`, `HEALTHCHECK` on `/api/health`.
-- [ ] Pin base images by digest (Renovate updates them). Same Node major as `.nvmrc`.
-- [ ] Native deps (argon2) build in the build stage; verify the runtime has the needed libc.
-- [ ] `.dockerignore`: node_modules, .next, dist, .turbo, coverage, .env*, .git, docs, e2e artifacts.
-- [ ] `compose.yaml` (prod-like):
+- [x] api runtime: `pnpm deploy --prod` output (or pruned `node_modules` + `dist`), `node dist/main.js`, `HEALTHCHECK` on `/api/v1/health/live`, `NODE_ENV=production`, `tini` (or `--init`) for signal handling.
+- [x] web runtime: Next `standalone` + `.next/static` + `public`, `node server.js`, `HEALTHCHECK` on `/api/health`.
+- [x] Pin base images by digest (Renovate updates them). Same Node major as `.nvmrc`.
+- [x] Native deps (argon2) build in the build stage; verify the runtime has the needed libc.
+- [x] `.dockerignore`: node_modules, .next, dist, .turbo, coverage, .env*, .git, docs, e2e artifacts.
+- [x] `compose.yaml` (prod-like):
   - api, web and the selected DB (`@module:db-*` markers).
   - Healthchecks and `depends_on: condition: service_healthy`.
   - Secrets via env_file (gitignored), read-only root filesystem where possible, `restart: unless-stopped`.
-- [ ] `compose.dev.yaml`: only DB services for host development (from M04/M05).
-- [ ] Script `docker:smoke`: build images, `compose up -d`, wait for healthy, curl health endpoints, run Postgres migrations if selected, `compose down -v`.
-- [ ] Record the baseline image sizes (input for M14 budgets).
+- [x] `compose.dev.yaml`: only DB services for host development (from M04/M05).
+- [x] Script `docker:smoke`: build images, `compose up -d`, wait for healthy, curl health endpoints, run Postgres migrations if selected, `compose down -v`.
+- [x] Record the baseline image sizes (input for M14 budgets).
 
 ## Deliverables
 

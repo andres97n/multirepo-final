@@ -20,7 +20,7 @@ function compileModule(env: Record<string, string>, warn = vi.fn()) {
     imports: [ConfigModule, LoggerModule, MongoDatabaseModule.forRoot()],
   })
     .overrideProvider(Logger)
-    .useValue({ warn });
+    .useValue({ warn, log: vi.fn() });
   return { builder, warn };
 }
 

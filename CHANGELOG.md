@@ -2,6 +2,27 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.11.0] - 2026-11-25
+
+### Added
+
+- **10:16 — `c820ea9` docs: ADR-0012 and Docker docs (M12)** — README "Run with Docker", Dockerfile stages in `apps/api/AGENTS.md` and `apps/web/AGENTS.md`, and the `docker:smoke` command in `AGENTS.md`. M12 is done.
+- **10:15 — `822877f` test(repo): docker smoke and Postgres docker live check (M12, tooling)**
+  - `pnpm docker:smoke` builds and starts the stack on ports 3916/3917 with throwaway secrets. It checks api and web health, web → api over the compose network, a static asset, a non-root uid, no leaked `.env`/source/`.git`/devDeps/package managers, and SIGTERM (stop < 10 s, shutdown logged). It always tears down.
+  - `bash scripts/live-check/docker-postgres.sh` runs the same smoke on a copy of the working tree pruned to Postgres without auth. Migrations run first.
+  - `perf-budgets.json` (draft) holds the image-size baseline: api 452 MB / web 392 MB (318 / 261 MB on disk).
+- **10:15 — `1d214e7` feat(api): in-image Postgres migrator and shutdown log (M12, base-specific)**
+  - `node dist/infra/database/postgres/migrate.js` applies the Drizzle journal with the runtime `drizzle-orm` migrator. It is an explicit deploy step, never run on boot.
+  - The api logs `shutting down (<signal>)` once its DB connections are closed.
+- **10:15 — `77003d8` build(docker): turbo-prune images and prod-like compose stack (M12, architecture)**
+  - `apps/{api,web}/Dockerfile` use pruner → deps → build → runtime stages on `node:24-trixie-slim` pinned by digest. They run as non-root, health-check with node `fetch`, and ship no package manager at runtime.
+  - The api runtime is `pnpm deploy --prod` output (`files`: `dist`, `migrations`). The web runtime is Next `standalone`.
+  - `compose.yaml` (project `app-stack`): api, web and the selected DB in `@module:db-*` regions, healthchecks with `service_healthy`, secrets from gitignored `docker/{api,web}.env` (templates `docker/*.env.example`), and `init`, read-only root fs, `no-new-privileges`, `restart: unless-stopped`.
+
+### Security
+
+- Trivy reports 0 CRITICAL in both runtime images. The bookworm base carried CRITICAL zlib1g CVE-2023-45853, hence trixie. The remaining 51 HIGH are Debian OS packages (50 without an upstream fix), accepted in ADR-0012 until the next base digest bump.
+
 ## [0.10.0] - 2026-11-24
 
 ### Added

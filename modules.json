@@ -20,6 +20,8 @@
         "apps/api/vitest.e2e.config.mts",
         "apps/api/scripts/e2e-server.mjs",
         "compose.dev.yaml",
+        "compose.yaml",
+        "docker/api.env.example",
         "apps/api/src/modules/auth/auth.module.ts"
       ],
       "deps": {
@@ -54,6 +56,8 @@
         "apps/api/.env.example",
         "apps/api/scripts/e2e-server.mjs",
         "compose.dev.yaml",
+        "compose.yaml",
+        "docker/api.env.example",
         "apps/api/src/modules/auth/auth.module.ts"
       ],
       "deps": {
@@ -105,6 +109,7 @@
         "apps/api/src/app.module.ts",
         "apps/api/src/config/env.schema.ts",
         "apps/api/.env.example",
+        "docker/api.env.example",
         "apps/api/vitest.config.mts",
         "apps/api/src/infra/database/postgres/schema/index.ts",
         "apps/web/src/proxy.ts",
@@ -112,6 +117,7 @@
         "apps/web/src/lib/env.schema.ts",
         "apps/web/src/lib/env.test.ts",
         "apps/web/.env.example",
+        "docker/web.env.example",
         "apps/web/vitest.config.ts",
         "apps/web/next.config.ts",
         "apps/web/src/app/(public)/layout.tsx",
