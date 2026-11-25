@@ -5,12 +5,11 @@ import { test, expect } from '../fixtures';
 const PAGES = ['/', '/about', '/does-not-exist', '/login'];
 
 for (const path of PAGES) {
-  test(`CSP header is set and no violations on ${path}`, async ({ page, violations }) => {
+  // The auto `violations` fixture asserts no CSP violation once the page settles.
+  test(`CSP header is set and no violations on ${path}`, async ({ page }) => {
     const response = await page.goto(path);
 
     expect(response?.headers()['content-security-policy']).toBeDefined();
-    await page.waitForLoadState('load');
-    expect(violations).toEqual([]);
   });
 }
 

@@ -149,8 +149,9 @@ pnpm test:e2e:web:ui             # root: same, in Playwright UI mode for local d
 - Env (ports, secrets, lockout threshold) lives in `e2e/env.ts`. The api and web servers are started by Playwright's `webServer`; never start them by hand.
 - Debug a failing test with `pnpm test:e2e:web:ui`. Failures keep a trace, screenshot and video in `apps/web/test-results/` (gitignored); open a trace with `pnpm exec playwright show-trace <trace.zip>`.
 - Firefox and WebKit are optional and not configured; the matrix is Chromium only (M10 scope).
-- One-time setup on a new machine: `pnpm --filter web exec playwright install chromium`.
-- The api side uses `apps/api/scripts/e2e-server.mjs` (MongoDB memory server). A Postgres project needs its own bootstrap there.
+- The root scripts install Chromium if it is missing (a no-op once cached).
+- The api side is `apps/api/scripts/e2e-server.mjs`. It reads the engine from `apps/api/src/app.module.ts`: MongoDB runs in memory; Postgres runs in Docker (private compose project `e2e`, port 5434, migrated with `db:migrate`), so Docker must be running. `e2e/global-teardown.ts` removes the container.
+- Submit buttons that depend on client code should stay disabled until hydration (see `login-form.tsx`); tests then wait with `toBeEnabled()`, never `networkidle`.
 
 ## Gates
 

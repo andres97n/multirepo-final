@@ -2,7 +2,7 @@ import { execFile } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { promisify } from 'node:util';
 
-import { type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 import { apiEnv } from '../env';
 
@@ -47,9 +47,10 @@ export async function login(page: Page, email: string, password: string): Promis
   if (!new URL(page.url()).pathname.startsWith('/login')) {
     await page.goto('/login');
   }
-  // A pre-hydration click would be a native form POST, so wait for the page to settle.
-  await page.waitForLoadState('networkidle');
+  const signIn = page.getByRole('button', { name: 'Sign in' });
+  // The form keeps submit disabled until it has hydrated.
+  await expect(signIn).toBeEnabled();
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
-  await page.getByRole('button', { name: 'Sign in' }).click();
+  await signIn.click();
 }

@@ -33,6 +33,21 @@ export const test = base.extend<{ violations: string[] }>({
       });
 
       await use(violations);
+      // Let pending violation events and binding calls arrive before asserting.
+      // The catch only covers a page that is already closed.
+      await page
+        .evaluate(
+          () =>
+            new Promise<void>((resolve) =>
+              requestIdleCallback(
+                () => {
+                  resolve();
+                },
+                { timeout: 2000 },
+              ),
+            ),
+        )
+        .catch(() => undefined);
       expect(violations).toEqual([]);
     },
     { auto: true },

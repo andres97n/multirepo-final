@@ -33,7 +33,7 @@ Browser smoke tests run against the **production build** of web plus a running a
   - Logout → protected again.
   - Session cookie not readable from JS.
   - Locked-out user message after N failures (with test env lockout = 2).
-- [ ] Specs, **no-auth** (`e2e/no-auth/public.spec.ts` written, not yet run: only the prune run executes it): home loads with api health OK; navigation between public pages; 404 page; `/api/health`.
+- [x] Specs, **no-auth**: home loads with api health OK; navigation between public pages; 404 page; `/api/health`.
 - [x] Shared specs: CSP header present and no console CSP violations on visited pages; no uncaught page errors.
 - [x] Scripts: `test:e2e:web` (build + run), `test:e2e:web:ui` (local debugging).
 
@@ -102,7 +102,7 @@ ADR-0010 (dynamic `global-not-found`); otherwise follows ADR-0006/0009.
 
 - No global setup and no test-only endpoint: each test seeds its own admin through the built `seed:admin`.
 - Lockout shows the same generic error (AC-M06.10); the test proves the correct password is rejected with that text.
-- `apps/api/scripts/e2e-server.mjs` boots Mongo only; a Postgres project needs its own bootstrap.
+- `apps/api/scripts/e2e-server.mjs` picks the engine from `app.module.ts`: MongoDB in memory, or Postgres in Docker (migrated with `db:migrate`). Both engines were run with the auth project.
 
 ## Definition of Done
 

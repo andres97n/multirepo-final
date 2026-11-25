@@ -19,14 +19,13 @@ export default tseslint.config(
     },
   },
   {
-    // Playwright specs (M10). `networkidle` is allowed: login waits for hydration before a submit.
+    // Playwright specs (M10).
     files: ['**/e2e/**/*.ts'],
     ...playwright.configs['flat/recommended'],
     rules: {
       ...playwright.configs['flat/recommended'].rules,
       'playwright/no-focused-test': 'error',
       'playwright/no-skipped-test': 'error',
-      'playwright/no-networkidle': 'off',
     },
   },
 );

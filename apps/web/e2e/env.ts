@@ -7,6 +7,7 @@
 export const WEB_PORT = 3916;
 export const API_PORT = 3917;
 export const MONGO_PORT = 27099;
+export const POSTGRES_PORT = 5434;
 
 // Must be `localhost`: Chromium accepts the `__Host-` Secure cookie over http
 // only on localhost.
@@ -19,6 +20,10 @@ export const apiEnv: Record<string, string> = {
   PORT: String(API_PORT),
   E2E_MONGO_PORT: String(MONGO_PORT),
   MONGO_URI: `mongodb://127.0.0.1:${String(MONGO_PORT)}/e2e`,
+  // Postgres projects: Docker container in the private compose project `e2e`
+  // (app role from docker/postgres/init). Ignored on Mongo.
+  E2E_POSTGRES_PORT: String(POSTGRES_PORT),
+  DATABASE_URL: `postgres://app:app@127.0.0.1:${String(POSTGRES_PORT)}/app`,
   CORS_ORIGIN: WEB_URL,
   JWT_ACCESS_SECRET: 'e2e-jwt-access-secret-0123456789abcdefghij',
   LOCKOUT_THRESHOLD: '2',

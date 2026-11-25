@@ -18,8 +18,8 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:e2e": "turbo run test:e2e",
-    "test:e2e:web": "turbo run build --filter=api... --filter=\"web^...\" && pnpm --filter web test:e2e:web",
-    "test:e2e:web:ui": "turbo run build --filter=api... --filter=\"web^...\" && pnpm --filter web test:e2e:web:ui",
+    "test:e2e:web": "pnpm --filter web exec playwright install chromium && turbo run build --filter=api... --filter=\"web^...\" && pnpm --filter web test:e2e:web",
+    "test:e2e:web:ui": "pnpm --filter web exec playwright install chromium && turbo run build --filter=api... --filter=\"web^...\" && pnpm --filter web test:e2e:web:ui",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky"
