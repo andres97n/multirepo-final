@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { renderToString } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { axe } from 'vitest-axe';
 
@@ -40,6 +41,14 @@ afterEach(() => {
 });
 
 describe('LoginForm', () => {
+  it('disables submit until hydrated (server render)', () => {
+    expect(renderToString(<LoginForm next="/" />)).toMatch(
+      /<button[^>]*type="submit"[^>]*disabled/,
+    );
+    renderForm();
+    expect(screen.getByRole('button', { name: /sign in/i })).toBeEnabled();
+  });
+
   it('renders an accessible form', async () => {
     const { container } = renderForm();
 

@@ -18,6 +18,8 @@ import * as React from 'react';
 
 const GENERIC_ERROR = 'Unable to sign in. Please check your email and password and try again.';
 
+const noopSubscribe = (): (() => void) => () => undefined;
+
 export interface LoginFormProps {
   /** Already sanitised by the RSC page (`lib/safe-redirect.ts`). */
   next: string;
@@ -31,6 +33,13 @@ export interface LoginFormProps {
 export function LoginForm({ next }: LoginFormProps): React.ReactElement {
   const [error, setError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
+  // False on the server and during hydration: a click before hydration would be
+  // a native form POST to the JSON-only handler.
+  const hydrated = React.useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  );
 
   async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -88,7 +97,7 @@ export function LoginForm({ next }: LoginFormProps): React.ReactElement {
               {error}
             </p>
           )}
-          <Button type="submit" disabled={submitting}>
+          <Button type="submit" disabled={!hydrated || submitting}>
             {submitting ? 'Signing in…' : 'Sign in'}
           </Button>
         </form>
