@@ -51,6 +51,18 @@ describe('postgres migrations', () => {
     }
   });
 
+  it('redacts a scheme-less (protocol-relative) authority', () => {
+    expect(redactCredentials('bad host //app:s3cret@db:5432')).toBe(
+      'bad host //[REDACTED]@db:5432',
+    );
+  });
+
+  it('masks the known secret wherever it appears, raw or URL-decoded', () => {
+    const redacted = redactCredentials('auth failed (p%40ss) and p@ss echoed', 'p%40ss');
+    expect(redacted).not.toContain('p%40ss');
+    expect(redacted).not.toContain('p@ss');
+  });
+
   it('leaves a message without credentials unchanged', () => {
     const message = 'relation "users" does not exist';
     expect(redactCredentials(message)).toBe(message);
