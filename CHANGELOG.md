@@ -6,6 +6,8 @@ All notable changes to this project are documented here. Format based on [Keep a
 
 ### Added
 
+- **21:33 — `2801236` test(repo): live check for pruned Postgres trees (M11, tooling)** — `bash scripts/live-check/modules-postgres.sh <auth|no-auth>` applies the selection in a worktree of HEAD and checks it on Postgres 17: pruned compose, non-superuser role, idempotent migrations with no schema drift, boot, seed-admin + login + `/auth/me` (or 404 without auth), health down/up.
+
 - **21:18 — `90666bb` feat(repo): module manifest and pruning script (M11, architecture)**
   - `modules.json` + `modules.schema.json` describe `db-mongo`, `db-postgres` and `auth`: paths, markers, deps, env, compose, requires/conflicts.
   - `pnpm modules:check` validates the schema, paths and marker balance and flags orphan markers, `requires` cycles and invalid default selections (`file:line` errors). lint-staged runs it when a marked file is staged.
@@ -21,6 +23,7 @@ All notable changes to this project are documented here. Format based on [Keep a
 
 ### Fixed
 
+- **21:33 — `ab85a78` fix(repo): the auth migration is pruned with auth (M11)** — a Postgres tree without auth still created `users`/`sessions`, and `db:generate` wanted to drop them. Postgres trees now run `pnpm --filter api db:generate` after install (a no-op with auth; without auth it writes an empty journal).
 - **21:18 — `90ff1af`, `1eb4ea1`, `91c2c96` fix(repo): pruned trees stay green** — JSX marker regions, `e2e-server.mjs` imports per engine, `proxy.ts` stays valid without auth, the Mongo-only env spec is marked, and the matrix writes local env files.
 
 ## [0.9.0] - 2026-11-24
