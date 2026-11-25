@@ -6,12 +6,16 @@ All notable changes to this project are documented here. Format based on [Keep a
 
 ### Added
 
+- **19:19 — `89938a4` test(web): E2E on Postgres and steadier CSP checks (M10, tooling)**
+  - `e2e-server.mjs` reads the engine from `app.module.ts`: MongoDB in memory, or Postgres in Docker (compose project `e2e`, migrated with `db:migrate`, removed by a global teardown).
+  - The violations fixture waits for browser idle before asserting; the root scripts install Chromium when missing.
 - **19:07 — `ef2a8cf` test(web): Playwright E2E smoke suite (M10, tooling)**
   - `pnpm test:e2e:web` runs against the production build of web and a running api, with an `auth` or `no-auth` project picked from the installed modules.
   - CSP violations and uncaught page errors fail any test; `eslint-plugin-playwright` blocks focused and skipped tests.
 
 ### Fixed
 
+- **19:19 — `95e780e` fix(web): login submit is disabled until hydrated** — a click before hydration posted the form natively to the JSON-only handler and showed a raw 400. E2E waits on the button instead of `networkidle`.
 - **19:07 — `b8bcf69` fix(web): CSP violations found by the browser suite (security)**
   - `/login` no longer triggers a `script-src eval` report from Zod.
   - Unknown URLs render a dynamic `global-not-found.tsx`, so their scripts carry the nonce instead of being blocked (ADR-0010).
