@@ -2,7 +2,7 @@
 
 | Field      | Value                                                                          |
 | ---------- | ------------------------------------------------------------------------------ |
-| Status     | In progress                                                                    |
+| Status     | Done                                                                           |
 | Depends on | [M06](./M06-auth-api.md), [M09](./M09-web-auth.md), [M10](./M10-playwright.md) |
 | PRD refs   | FR-1.1, FR-1.2, FR-1.3, FR-1.4, §4.2, §9 acceptance (2, 3), NFR-DX-2           |
 | Axes       | 1 (Modular), 8 (AI docs)                                                       |
@@ -93,6 +93,13 @@ node --test "scripts/*.test.mjs"
 pnpm modules:matrix     # 4 combos green
 node scripts/modules.mjs apply --db=postgres --without=auth && node scripts/modules.mjs apply --db=postgres --without=auth && git diff --stat   # idempotent second run
 ```
+
+### Verification log (2026-11-24)
+
+- `pnpm modules:matrix`: mongo, mongo+auth, postgres, postgres+auth all PASS (install, lint, typecheck, test, build, Playwright `no-auth` 10/10 and `auth` 13/13).
+- Idempotency and dry-run were checked on a worktree of the real tree (second `apply` reports 0 actions with an empty `git diff`; dry-run leaves file hashes unchanged). Script tests: 20 pass, 95% line coverage.
+- AC-M11.8: the `scaffold` mechanics (apply, env secrets, gates) are proven by the matrix; a full interactive agent run in a fresh clone is still to be done by the owner.
+- AC-M11.11: OpenCode v2.3.2 lists `adr` and `scaffold` and loads AGENTS.md (ADR-0011 §6).
 
 ## ADRs produced
 
