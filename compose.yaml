@@ -1,0 +1,85 @@
+# Own project name: compose.dev.yaml uses the directory name, and sharing it
+# would let `down -v` here delete the dev database volumes.
+name: app-stack
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    env_file: ${API_ENV_FILE:-docker/api.env}
+    ports:
+      - '127.0.0.1:${API_PORT:-3001}:3001'
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    depends_on:
+      # @module:db-mongo
+      mongo:
+        condition: service_healthy
+      # @end-module:db-mongo
+      # @module:db-postgres
+      postgres:
+        condition: service_healthy
+      # @end-module:db-postgres
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        APP_ORIGIN: '${APP_ORIGIN:-http://localhost:3000}'
+    env_file: ${WEB_ENV_FILE:-docker/web.env}
+    ports:
+      - '127.0.0.1:${WEB_PORT:-3000}:3000'
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/apps/web/.next/cache
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+  # @module:db-mongo
+  mongo:
+    image: mongo:8.0
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+  # @end-module:db-mongo
+  # @module:db-postgres
+  postgres:
+    image: postgres:17
+    environment:
+      # Superuser is for provisioning only; the app connects as the `app` role
+      # created by docker/postgres/init/01-app-role.sql (NOSUPERUSER).
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d app']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+  # @end-module:db-postgres
+volumes:
+  # @module:db-mongo
+  mongo-data:
+  # @end-module:db-mongo
+  # @module:db-postgres
+  postgres-data:
+  # @end-module:db-postgres

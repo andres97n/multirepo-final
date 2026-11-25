@@ -5,6 +5,7 @@ coverage
 .turbo
 .env*
 !.env.example
+docker/*.env
 .omc
 .omo
 .recall
