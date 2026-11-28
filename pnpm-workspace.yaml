@@ -16,3 +16,9 @@ allowBuilds:
   # esbuild ships prebuilt platform binaries; its install script links the
   # platform package (pulled in by vitest/vite and @tailwindcss tooling).
   esbuild: true
+
+# Transitive versions with advisories, forced to patched releases. Drop each once
+# its parent (typescript-estree; drizzle-kit's @esbuild-kit) ships a patched range.
+overrides:
+  'minimatch@>=7.0.0 <11.0.1': 11.0.8 # GHSA-g3hv-75wg-m249
+  'esbuild@<0.25.0': 0.25.12 # GHSA-67mh-4wv8-2f99
