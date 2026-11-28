@@ -15,7 +15,6 @@ import { MongoDatabaseModule } from './infra/database/mongo';
 import type { ExecutionContext } from '@nestjs/common';
 import { AuthController } from './modules/auth/auth.controller';
 import { AuthModule } from './modules/auth/auth.module';
-// @end-module:auth
 import { HealthModule } from './infra/health/health.module';
 import { LoggerModule } from './infra/logger/logger.module';
 
