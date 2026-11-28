@@ -27,13 +27,13 @@ The full list is in `AGENTS.md` ("Key behaviours") and the ADRs. In short:
 
 CI runs these through the reusable workflows in [`andres97n/platform-config`](https://github.com/andres97n/platform-config) (ADR-0013). Each check runs on every pull request and every push to `develop` and `main`.
 
-| Tool                             | Scope                                                 | Blocks on                                                                  |
-| -------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------- |
-| gitleaks                         | full git history                                      | any finding (test fixtures allowlisted by path in `.gitleaks.toml`)        |
-| CodeQL (`javascript-typescript`) | repository sources                                    | an `error`-level alert; an alert whose rule can't be resolved fails closed |
-| `scripts/audit-gate.mjs`         | `pnpm audit`, production dependencies                 | high/critical without a live exception; **any** expired exception          |
-| dependency-review                | dependency changes in a pull request                  | new high/critical advisories; GPL-3.0 or AGPL-3.0 licenses                 |
-| Trivy (`--scanners vuln`)        | api and web runtime images (`smoke-api`, `smoke-web`) | CRITICAL                                                                   |
+| Tool                             | Scope                                                 | Blocks on                                                                            |
+| -------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| gitleaks                         | full git history                                      | any finding (test fixtures exempt from `generic-api-key` only, see `.gitleaks.toml`) |
+| CodeQL (`javascript-typescript`) | repository sources                                    | an `error`-level alert; an alert whose rule can't be resolved fails closed           |
+| `scripts/audit-gate.mjs`         | `pnpm audit`, production dependencies                 | high/critical without a live exception; **any** expired exception                    |
+| dependency-review                | dependency changes in a pull request                  | new high/critical advisories; GPL-3.0 or AGPL-3.0 licenses                           |
+| Trivy (`--scanners vuln`)        | api and web runtime images (`smoke-api`, `smoke-web`) | CRITICAL                                                                             |
 
 Moderate and lower advisories, dev-only advisories and HIGH image findings are reported but don't block. Each one is either fixed or recorded as an exception.
 
