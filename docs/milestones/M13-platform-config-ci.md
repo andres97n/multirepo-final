@@ -45,7 +45,7 @@ New sibling repo `platform-config/`: Renovate preset and reusable workflows. In 
   - ~~`perf.yml`: skeleton~~ deferred to M14 (a skeleton would only duplicate `quality.yml`; see ADR-0013).
   - All workflows: top-level `permissions: {}` with per-job minimal grants, every `uses:` pinned by full SHA (comment with version), `concurrency` cancel-in-progress, `timeout-minutes` set.
 - [x] Self-CI for platform-config: actionlint, renovate-config-validator, zizmor (workflow security lint).
-- [ ] Release: tag `v1.0.0` and move the floating `v1` tag; CHANGELOG.
+- [x] Release: tag `v1.0.0` and move the floating `v1` tag; CHANGELOG.
 
 ### Boilerplate
 
@@ -105,6 +105,23 @@ New sibling repo `platform-config/`: Renovate preset and reusable workflows. In 
 - Open a PR in the boilerplate and check that every job is green.
 - Push test branches: one with a fake AWS key (gitleaks fails), one with a vulnerable dep (audit fails), one with an unbalanced marker (matrix fails).
 - `grep -rnE "uses: [^@]+@(v[0-9]|main|master)" .github platform-config/.github` → no matches.
+
+## Evidence (2026-11-28)
+
+| AC                | Result                                                                                                                                                                                                                                                                                                                                           |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 13.1              | `v1.0.0` and `v1` at `013474b`; platform-config `self-ci` green                                                                                                                                                                                                                                                                                  |
+| 13.2              | PR #1, all 15 jobs green: [run 46166887269](https://github.com/andres97n/multirepo-final/actions/runs/46166887269)                                                                                                                                                                                                                               |
+| 13.3              | Unbalanced marker fails `modules:check` and the matrix: [run 46168771972](https://github.com/andres97n/multirepo-final/actions/runs/46168771972)                                                                                                                                                                                                 |
+| 13.4              | Re-run of the same commit: pnpm and turbo caches restored (FULL TURBO), `quality` 73 s → 27 s                                                                                                                                                                                                                                                    |
+| 13.5              | **Open:** needs `renovate.json` on `main` and the Renovate app installed                                                                                                                                                                                                                                                                         |
+| 13.6, 13.7, 13.10 | No unpinned `uses:`, `write-all` or `pull_request_target`; zizmor green                                                                                                                                                                                                                                                                          |
+| 13.8              | Random fake AWS key blocked by gitleaks: [run 46167984829](https://github.com/andres97n/multirepo-final/actions/runs/46167984829)                                                                                                                                                                                                                |
+| 13.9              | High advisory blocked ([run 46167220204](https://github.com/andres97n/multirepo-final/actions/runs/46167220204)), live exception passes ([run 46167504477](https://github.com/andres97n/multirepo-final/actions/runs/46167504477)), expired one fails ([run 46167736066](https://github.com/andres97n/multirepo-final/actions/runs/46167736066)) |
+| 13.11             | Full matrix, 2 min 55 s wall-clock (16:45:54 → 16:48:49 UTC)                                                                                                                                                                                                                                                                                     |
+| 13.12             | `pnpm test:coverage` runs in the `quality` job                                                                                                                                                                                                                                                                                                   |
+
+The first PR run (46166140467) found three problems, now fixed: the API had helmet's CSP disabled (CodeQL), the API e2e suite had no database on the Postgres combos, and the repository's dependency graph was off (dependency review). The last one is a repository setting that a child must also enable.
 
 ## ADRs produced
 

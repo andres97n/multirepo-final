@@ -51,6 +51,10 @@ Install the [Renovate GitHub app](https://github.com/apps/renovate) on the child
 - The preset follows the floating `v1` tag, so policy fixes arrive without a PR.
 - A new major (`v2`) means breaking input changes. Read the platform-config `CHANGELOG.md` and update `ci.yml` and `renovate.json` together.
 
+### Repository settings
+
+Enable the **Dependency graph** (Settings → Code security). Without it, the `dependency review` job fails with `Forbidden`.
+
 ### Branch protection (recommended)
 
 On `main`, and on `develop` if you use it:

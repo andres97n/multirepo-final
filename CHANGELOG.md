@@ -4,6 +4,11 @@ All notable changes to this project are documented here. Format based on [Keep a
 
 ## [0.12.0] - 2026-11-28
 
+### Fixed
+
+- **11:43 — `2fb0bcb` fix(api): provision Postgres for api e2e (M13)** — found by the first CI run of the matrix.
+- **11:43 — `4ebacc0` fix(api): keep helmet's Content-Security-Policy enabled (M13)**
+
 ### Added
 
 - **ci(repo): CI on the central `platform-config` workflows (M13, tooling)** — `.github/workflows/ci.yml` calls the reusable `quality`, `e2e`, `security` and `docker` workflows of [`andres97n/platform-config`](https://github.com/andres97n/platform-config), pinned by commit SHA (ADR-0013).
