@@ -1,0 +1,15 @@
+{
+  "$comment": "Accepted security findings, each for a limited time. CI (scripts/audit-gate.mjs) fails when any entry is past `expires`. Process: SECURITY.md#exceptions. `tool`: pnpm-audit | trivy | codeql | gitleaks | dependency-review. `advisories`: GHSA/CVE ids (pnpm-audit entries suppress matching advisories).",
+  "exceptions": [
+    {
+      "id": "EXC-2026-1",
+      "tool": "trivy",
+      "advisories": [],
+      "package": "Debian 13 OS packages of node:24-trixie-slim (util-linux, gzip, libacl1, pam, systemd libs, ncurses, perl-base, zlib1g, libzstd1)",
+      "finding": "51 HIGH CVEs in the runtime base image (see ADR-0012)",
+      "reason": "50 have no upstream fix yet, and the libzstd1 fix arrives with the next base digest. No CRITICAL. The packages are part of the base OS, and the app does not call them directly. HIGH does not block Trivy in CI; this entry records the acceptance.",
+      "owner": "Boilerplate maintainer",
+      "expires": "2027-02-25"
+    }
+  ]
+}

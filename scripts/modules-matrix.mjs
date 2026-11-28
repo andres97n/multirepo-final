@@ -14,20 +14,14 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { randomBytes } from 'node:crypto';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import process from 'node:process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { COMBOS, writeEnvFiles } from './combos.mjs';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const COMBOS = [
-  { label: 'mongo', args: ['--db=mongo', '--without=auth'] },
-  { label: 'mongo+auth', args: ['--db=mongo'] },
-  { label: 'postgres', args: ['--db=postgres', '--without=auth'] },
-  { label: 'postgres+auth', args: ['--db=postgres'] },
-];
 const GATES = [
   ['install', '--no-frozen-lockfile'],
   ['lint'],
@@ -39,21 +33,6 @@ const GATES = [
 
 const sh = (cmd, args, cwd, env = process.env) =>
   execFileSync(cmd, args, { cwd, env, stdio: 'inherit', shell: process.platform === 'win32' });
-
-/** Like /scaffold: local env files from each .env.example, `*_SECRET` set to random bytes. */
-function writeEnvFiles(dir) {
-  const files = [
-    ['apps/api/.env.example', 'apps/api/.env'],
-    ['apps/web/.env.example', 'apps/web/.env.local'],
-  ];
-  for (const [example, target] of files) {
-    const text = readFileSync(join(dir, example), 'utf8').replace(
-      /^#?\s*([A-Z0-9_]*_SECRET)=.*$/gm,
-      (_, key) => `${key}=${randomBytes(48).toString('base64url')}`,
-    );
-    writeFileSync(join(dir, target), text);
-  }
-}
 
 function runCombo({ label, args }) {
   const dir = mkdtempSync(join(tmpdir(), `modules-matrix-${label.replace('+', '-')}-`));
