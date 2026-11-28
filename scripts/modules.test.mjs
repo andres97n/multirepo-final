@@ -13,6 +13,7 @@ import {
   mkdtempSync,
   readFileSync,
   readdirSync,
+  renameSync,
   rmSync,
   statSync,
   writeFileSync,
@@ -35,6 +36,11 @@ const FIXTURE_BASE = join(__dirname, '__fixtures__', 'base');
 function makeTempFixture() {
   const dir = mkdtempSync(join(tmpdir(), 'modules-test-'));
   cpSync(FIXTURE_BASE, dir, { recursive: true });
+  // Committed as package.fixture.json so GitHub's dependency graph does not read the
+  // fixtures as real manifests (and raise alerts for their pinned versions).
+  for (const ws of ['api', 'web', 'packages/contracts']) {
+    renameSync(join(dir, ws, 'package.fixture.json'), join(dir, ws, 'package.json'));
+  }
   cpSync(join(__dirname, '..', 'modules.schema.json'), join(dir, 'modules.schema.json'));
   return dir;
 }
