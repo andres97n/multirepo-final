@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.12.1] - 2026-11-28
+
+### Security
+
+- **deps:** pnpm overrides force patched transitives: `minimatch` 11.0.8 (GHSA-g3hv-75wg-m249) and `esbuild` 0.25.12 (GHSA-67mh-4wv8-2f99).
+- **tests:** module-script fixtures are committed as `package.fixture.json`, so GitHub no longer raises alerts for their pinned versions (53 alerts).
+
 ## [0.12.0] - 2026-11-28
 
 _Released to `main` at 12:21 (tag `v0.12.0`, merge of `858ed9a`). M13 stays open until AC-M13.5 (Renovate onboarding) is verified._
