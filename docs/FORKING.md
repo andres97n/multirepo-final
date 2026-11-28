@@ -56,7 +56,7 @@ Install the [Renovate GitHub app](https://github.com/apps/renovate) on the child
 On `main`, and on `develop` if you use it:
 
 - Require a pull request before merging.
-- Require the status check **`ci-ok`** to pass. It aggregates every job; skipped matrix jobs count as passing.
+- Require the status check **`ci-ok`** to pass. It requires every job to succeed; only the matrix jobs may be skipped.
 - Require branches to be up to date before merging.
 - Block force pushes and deletions.
 

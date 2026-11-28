@@ -28,7 +28,7 @@ Every project cloned from this boilerplate needs the same dependency policy and 
 4. **Matrix policy:**
    - Every PR and push to `develop`/`main` runs the default selection (mongo+auth): quality, e2e (api + Playwright), security and docker.
    - The other three combos (mongo, postgres, postgres+auth) run quality and e2e only when the diff touches the module system (`modules.json`, apply scripts, any module path or marked file, dependency files), nightly on `main`, and on manual dispatch.
-   - One aggregate job, `ci-ok`, is the only required check, so skipped matrix jobs never block a merge.
+   - One aggregate job, `ci-ok`, is the only required check. It requires `success` from every job and accepts `skipped` only from the matrix jobs.
 5. **Blocking levels** (also in `SECURITY.md`):
 
    | Tool              | Blocks on                                                                         |
@@ -40,7 +40,7 @@ Every project cloned from this boilerplate needs the same dependency policy and 
    | Trivy             | CRITICAL                                                                          |
    | coverage          | per-workspace thresholds (`pnpm test:coverage`, new Turbo task)                   |
 
-   Test fixtures with deliberate dummy secrets are allowlisted by path in `.gitleaks.toml`.
+   Test fixtures with deliberate dummy secrets are allowlisted in `.gitleaks.toml` for the `generic-api-key` rule only, by test path; provider-specific rules still apply to tests.
 
 6. **Exceptions** move from the `SECURITY.md` table to `.security/exceptions.json`, as JSON so the gate needs no YAML parser dependency. Each entry has `id`, `tool`, `advisories`, `reason`, `owner` and `expires` (YYYY-MM-DD). `pnpm-audit` entries suppress the listed advisories until they expire. An expired entry of any tool fails CI.
 7. **Security posture of every workflow:**

@@ -1,7 +1,7 @@
 # gitleaks config (CI: platform-config security workflow). Default rules apply everywhere,
 # except test files: their fixtures carry deliberate dummy secrets (env-schema inputs,
 # crafted attacker tokens). Real secrets never belong in a repo, tests included; this
-# allowlist only stops those fixtures from failing CI. Keep it to test paths.
+# allowlist only stops those fixtures from failing CI. Keep it to test paths and the generic rule.
 title = "multirepo-final"
 
 [extend]
@@ -9,6 +9,9 @@ useDefault = true
 
 [[allowlists]]
 description = "Dummy secrets in test fixtures"
+# Only the generic heuristic, which the fixtures trip. Provider-specific rules
+# (AWS, GitHub, Stripe, private keys, ...) still apply to test files.
+targetRules = ["generic-api-key"]
 paths = [
   '''(^|/)[^/]+\.(spec|test|e2e-spec)\.(ts|tsx|mjs)$''',
   '''^apps/api/test/''',
