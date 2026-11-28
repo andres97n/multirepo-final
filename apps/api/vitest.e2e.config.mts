@@ -17,6 +17,9 @@ export default defineConfig({
     // @module:db-mongo
     globalSetup: ['./test/global-setup.ts'],
     // @end-module:db-mongo
+    // @module:db-postgres
+    // globalSetup: ['./test/global-setup-postgres.ts'],
+    // @end-module:db-postgres
     fileParallelism: false,
     testTimeout: 30000,
     hookTimeout: 120000,
