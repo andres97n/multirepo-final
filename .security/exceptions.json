@@ -10,6 +10,14 @@
       "reason": "50 have no upstream fix yet, and the libzstd1 fix arrives with the next base digest. No CRITICAL. The packages are part of the base OS, and the app does not call them directly. HIGH does not block Trivy in CI; this entry records the acceptance.",
       "owner": "Boilerplate maintainer",
       "expires": "2027-02-25"
+    },
+    {
+      "id": "TEST-1",
+      "tool": "pnpm-audit",
+      "advisories": ["GHSA-35jh-r3h4-6jhm", "GHSA-r5fr-rjxr-66jc"],
+      "reason": "AC-M13.9 test",
+      "owner": "test",
+      "expires": "2027-01-31"
     }
   ]
 }
