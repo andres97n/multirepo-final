@@ -13,12 +13,14 @@ All notable changes to this project are documented here. Format based on [Keep a
   - **Required check:** `ci-ok` aggregates every job and is the only check branch protection needs.
 - **`scripts/ci-prepare.mjs [combo]`:** frozen install, or apply a combo, re-resolve the lockfile and regenerate Postgres migrations. It then writes env files with random secrets. `scripts/combos.mjs` now holds the combos and the env writer shared with `modules:matrix`.
 - **`pnpm test:coverage`:** new Turbo task. CI enforces the per-workspace coverage thresholds.
+- **api e2e on Postgres:** `test/global-setup-postgres.ts` starts and migrates a Postgres container, so `pnpm test:e2e` on that selection needs Docker.
 - **`renovate.json`:** extends `github>andres97n/platform-config#v1`.
 - **`docs/FORKING.md` (draft):** how a child pins and upgrades platform-config, and the branch protection to set.
 
 ### Security
 
 - **ci(repo): blocking security checks in CI (M13)** — gitleaks on the full history, CodeQL (error level), `scripts/audit-gate.mjs`, dependency-review and Trivy (CRITICAL). Levels are in `SECURITY.md`.
+- **api:** helmet's default Content-Security-Policy is now enabled (it was off; CodeQL `js/insecure-helmet-configuration`).
 - **Exceptions:** moved to `.security/exceptions.json`, each with an expiry date. `audit-gate.mjs` fails on an expired entry of any tool and on high/critical production advisories without a live exception. EXC-2026-1 is migrated.
 - **`.gitleaks.toml`:** keeps the default rules and allowlists test-fixture paths only, where the dummy secrets are deliberate.
 
