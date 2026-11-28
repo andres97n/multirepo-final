@@ -269,7 +269,7 @@ bash scripts/live-check/docker-postgres.sh       # docker:smoke on a copy of the
 | M10 | Playwright                              | Done        |
 | M11 | Module system + skills (`modules.json`) | Done        |
 | M12 | Docker                                  | Done        |
-| M13 | platform-config + CI                    | In progress |
+| M13 | platform-config + CI                    | Done        |
 | M14 | Perf budgets                            | Not started |
 | M15 | Docs (ARCHITECTURE, RULES, FORKING)     | Not started |
 | M16 | v1 acceptance                           | Not started |
