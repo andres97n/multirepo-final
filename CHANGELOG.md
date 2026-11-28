@@ -4,6 +4,8 @@ All notable changes to this project are documented here. Format based on [Keep a
 
 ## [0.12.1] - 2026-11-28
 
+_M13 closed: AC-M13.5 verified by the [Renovate Dependency Dashboard](https://github.com/andres97n/multirepo-final/issues/7)._
+
 ### Security
 
 - **deps:** pnpm overrides force patched transitives: `minimatch` 11.0.8 (GHSA-g3hv-75wg-m249) and `esbuild` 0.25.12 (GHSA-67mh-4wv8-2f99).
