@@ -4,6 +4,8 @@ All notable changes to this project are documented here. Format based on [Keep a
 
 ## [0.12.0] - 2026-11-28
 
+_Released to `main` at 12:21 (tag `v0.12.0`, merge of `858ed9a`). M13 stays open until AC-M13.5 (Renovate onboarding) is verified._
+
 ### Fixed
 
 - **11:43 — `2fb0bcb` fix(api): provision Postgres for api e2e (M13)** — found by the first CI run of the matrix.
