@@ -25,19 +25,36 @@ The full list is in `AGENTS.md` ("Key behaviours") and the ADRs. In short:
 
 ## Blocking severities
 
-| Tool                                       | Scope                           | Blocks         |
-| ------------------------------------------ | ------------------------------- | -------------- |
-| Trivy (`--scanners vuln`)                  | api and web runtime images      | CRITICAL       |
-| `pnpm audit`, CodeQL, gitleaks, dep-review | repository (CI, arrives in M13) | defined in M13 |
+CI runs these through the reusable workflows in [`andres97n/platform-config`](https://github.com/andres97n/platform-config) (ADR-0013). Each check runs on every pull request and every push to `develop` and `main`.
 
-HIGH findings do not block, but each one is either fixed or recorded below.
+| Tool                             | Scope                                                 | Blocks on                                                                            |
+| -------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| gitleaks                         | full git history                                      | any finding (test fixtures exempt from `generic-api-key` only, see `.gitleaks.toml`) |
+| CodeQL (`javascript-typescript`) | repository sources                                    | an `error`-level alert; an alert whose rule can't be resolved fails closed           |
+| `scripts/audit-gate.mjs`         | `pnpm audit`, production dependencies                 | high/critical without a live exception; **any** expired exception                    |
+| dependency-review                | dependency changes in a pull request                  | new high/critical advisories; GPL-3.0 or AGPL-3.0 licenses                           |
+| Trivy (`--scanners vuln`)        | api and web runtime images (`smoke-api`, `smoke-web`) | CRITICAL                                                                             |
+
+Moderate and lower advisories, dev-only advisories and HIGH image findings are reported but don't block. Each one is either fixed or recorded as an exception.
 
 ## Exceptions
 
-An exception records a known finding that is accepted for a limited time. Each one has an id, the finding, the reason, an owner and a review date. An exception past its review date must be renewed with a new reason, or the finding fixed.
+Exceptions live in [`.security/exceptions.json`](./.security/exceptions.json). Each entry records a known finding that is accepted for a limited time:
 
-| Id         | Finding                                                                                                                                                           | Reason                                                                                                                                                                           | Owner                  | Review by                                  |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | ------------------------------------------ |
-| EXC-2026-1 | 51 HIGH CVEs in Debian 13 OS packages of `node:24-trixie-slim` (util-linux, gzip, libacl1, pam, systemd libs, ncurses, perl-base, zlib1g, libzstd1); see ADR-0012 | 50 have no upstream fix yet, and the libzstd1 fix arrives with the next base digest. No CRITICAL. The packages are part of the base OS, and the app does not call them directly. | Boilerplate maintainer | Next base-image digest bump, or 2027-02-25 |
+| Field        | Meaning                                                                                   |
+| ------------ | ----------------------------------------------------------------------------------------- |
+| `id`         | `EXC-<year>-<n>`, never reused                                                            |
+| `tool`       | `pnpm-audit`, `trivy`, `codeql`, `gitleaks` or `dependency-review`                        |
+| `advisories` | GHSA/CVE ids. For `pnpm-audit` these are the advisories the gate stops blocking           |
+| `finding`    | what was found                                                                            |
+| `reason`     | why it is accepted (no fix upstream, not reachable, …)                                    |
+| `owner`      | who reviews it                                                                            |
+| `expires`    | `YYYY-MM-DD`. From the next day, CI fails until the entry is renewed or the finding fixed |
 
-M13 moves this table to `.security/exceptions.yaml`, where CI fails on expired entries.
+Process:
+
+1. **Add:** fix the finding if you can. If not, add an entry in the same PR that introduces or reveals it, with a short expiry (90 days at most).
+2. **Renew:** renewing means a new `reason` and a new `expires`, reviewed like any change. Don't just bump the date.
+3. **Remove:** delete the entry when the finding is gone.
+
+`node scripts/audit-gate.mjs` runs the same check locally.

@@ -34,7 +34,7 @@ logs, baseline security middleware and the database ports + Mongo adapter.
   `PostgresRepository`, `PostgresQueryTranslator`, health indicator, `schema/`
   (`baseColumns`), `drizzle.config.ts` + `migrations/`. The only place `drizzle-orm`,
   `pg` and `@electric-sql/pglite` may be imported. See ADR-0005.
-- `test/` — e2e specs (supertest); `test/helpers.ts` builds the app.
+- `test/` — e2e specs (supertest); `test/helpers.ts` builds the app. The engine's global setup provides the database (Mongo in memory; Postgres in Docker).
 
 ## How to add a config fragment
 

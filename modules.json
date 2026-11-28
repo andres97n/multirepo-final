@@ -51,6 +51,7 @@
         "apps/api/drizzle.config.ts",
         "apps/api/src/modules/auth/postgres",
         "apps/api/test/auth-postgres.e2e-spec.ts",
+        "apps/api/test/global-setup-postgres.ts",
         "docker/postgres",
         "docker/postgres.env.example"
       ],
@@ -58,6 +59,7 @@
         "apps/api/src/app.module.ts",
         "apps/api/src/config/env.schema.ts",
         "apps/api/.env.example",
+        "apps/api/vitest.e2e.config.mts",
         "apps/api/scripts/e2e-server.mjs",
         "compose.dev.yaml",
         "compose.yaml",

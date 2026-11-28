@@ -98,7 +98,9 @@ multirepo-final/
 ├─ compose.dev.yaml · compose.yaml          dev services (mongo, postgres) / prod-like stack (ADR-0012)
 ├─ docker/                      {postgres,mongo}/init (least-privilege app users) · {api,web,mongo,postgres}.env.example for compose.yaml
 ├─ scripts/docker-smoke.mjs     pnpm docker:smoke (build, run, check, tear down)
-├─ .github/workflows/ci.yml     calls the reusable workflows in platform-config
+├─ .github/workflows/ci.yml     calls the reusable workflows in platform-config (pinned by SHA; ADR-0013)
+├─ scripts/ci-{prepare,changes}.mjs · scripts/audit-gate.mjs   CI glue: install/combo/env, matrix trigger, audit + exception expiry
+├─ .security/exceptions.json    accepted findings with expiry (CI fails when one expires) · .gitleaks.toml (test-fixture allowlist)
 ├─ renovate.json                thin config extending the platform-config preset
 ├─ .claude/skills/{scaffold,adr}/SKILL.md · .claude/settings.json
 ├─ opencode.json                OpenCode/OMO permissions (AGENTS.md + .claude/skills are discovered natively)
@@ -110,7 +112,7 @@ multirepo-final/
    ├─ adr/NNNN-*.md             immutable decision records (template: 0000-template.md)
    └─ ARCHITECTURE.md · DEVELOPMENT-RULES.md · FORKING.md
 
-platform-config/   (separate repo) Renovate preset + reusable workflows {quality,security,docker,perf,e2e}
+platform-config/   (separate repo, public) Renovate preset + reusable workflows {quality,e2e,security,docker}
 ```
 
 ## Stack
@@ -204,6 +206,8 @@ pnpm --filter api db:sync-indexes          # Mongo indexes (deploy step)
 pnpm --filter api db:generate | db:migrate # Postgres migrations (explicit step)
 pnpm --filter @repo/contracts build        # contracts must build before consumers
 pnpm modules:check       # validate modules.json + markers (M11)
+pnpm test:coverage       # tests with per-workspace coverage thresholds (what CI runs)
+node scripts/audit-gate.mjs   # pnpm audit + .security/exceptions.json expiry (CI security gate)
 docker compose up -d --build --wait        # prod-like stack (compose.yaml; needs docker/{api,web}.env)
 pnpm docker:smoke        # build + run the stack, check health/non-root/leaks/SIGTERM, tear down (M12)
 ```
@@ -265,7 +269,7 @@ bash scripts/live-check/docker-postgres.sh       # docker:smoke on a copy of the
 | M10 | Playwright                              | Done        |
 | M11 | Module system + skills (`modules.json`) | Done        |
 | M12 | Docker                                  | Done        |
-| M13 | platform-config + CI                    | Not started |
+| M13 | platform-config + CI                    | In progress |
 | M14 | Perf budgets                            | Not started |
 | M15 | Docs (ARCHITECTURE, RULES, FORKING)     | Not started |
 | M16 | v1 acceptance                           | Not started |

@@ -1,0 +1,158 @@
+# CI for multirepo-final. The jobs call the reusable workflows in andres97n/platform-config,
+# pinned by commit SHA (Renovate proposes upgrades). Project logic lives in scripts/:
+# ci-prepare.mjs (install, module combo, env files), ci-changes.mjs (does the matrix need
+# to run?) and audit-gate.mjs (audit + exception expiry). See ADR-0013.
+#
+# Every PR and push runs the default selection (mongo + auth). The other three module
+# combos run when the change touches the module system, nightly, or on manual dispatch.
+# Branch protection requires only `ci-ok`.
+name: ci
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+  schedule:
+    # 06:00 UTC = 01:00 America/Guayaquil. Scheduled runs use the default branch.
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  changes:
+    name: module changes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      modules: ${{ steps.diff.outputs.modules }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - id: diff
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: node scripts/ci-changes.mjs "$BASE"
+
+  quality:
+    uses: andres97n/platform-config/.github/workflows/quality.yml@013474ba2f928b1790c175213b54494f793f3dfa # v1.0.0
+    permissions:
+      contents: read
+    with:
+      prepare-command: node scripts/ci-prepare.mjs
+      commands: |
+        pnpm format:check
+        pnpm modules:check
+        pnpm test:scripts
+        pnpm lint
+        pnpm typecheck
+        pnpm test:coverage
+        pnpm build
+        pnpm --filter web check:bundle
+        pnpm --filter @repo/contracts check:exports
+
+  e2e:
+    uses: andres97n/platform-config/.github/workflows/e2e.yml@013474ba2f928b1790c175213b54494f793f3dfa # v1.0.0
+    permissions:
+      contents: read
+    with:
+      prepare-command: node scripts/ci-prepare.mjs
+      playwright: true
+      playwright-install-command: pnpm --filter web exec playwright install --with-deps chromium
+      commands: |
+        pnpm test:e2e
+        pnpm test:e2e:web
+      timeout-minutes: 40
+
+  security:
+    uses: andres97n/platform-config/.github/workflows/security.yml@013474ba2f928b1790c175213b54494f793f3dfa # v1.0.0
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    with:
+      # The gate reads the lockfile and .security/exceptions.json; no install needed.
+      prepare-command: ''
+      audit-command: node scripts/audit-gate.mjs
+
+  docker:
+    uses: andres97n/platform-config/.github/workflows/docker.yml@013474ba2f928b1790c175213b54494f793f3dfa # v1.0.0
+    permissions:
+      contents: read
+    with:
+      smoke-command: pnpm docker:smoke
+      scan-images: smoke-api smoke-web
+      # Budgets arrive in M14 (perf-budgets.json); until then sizes are only reported.
+      image-budgets-mb: ''
+
+  matrix-quality:
+    needs: changes
+    if: needs.changes.outputs.modules == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        combo: [mongo, postgres, postgres+auth]
+    uses: andres97n/platform-config/.github/workflows/quality.yml@013474ba2f928b1790c175213b54494f793f3dfa # v1.0.0
+    permissions:
+      contents: read
+    with:
+      prepare-command: node scripts/ci-prepare.mjs ${{ matrix.combo }}
+      cache-key: ${{ matrix.combo }}
+      commands: |
+        pnpm modules:check
+        pnpm lint
+        pnpm typecheck
+        pnpm test
+        pnpm build
+
+  matrix-e2e:
+    needs: changes
+    if: needs.changes.outputs.modules == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        combo: [mongo, postgres, postgres+auth]
+    uses: andres97n/platform-config/.github/workflows/e2e.yml@013474ba2f928b1790c175213b54494f793f3dfa # v1.0.0
+    permissions:
+      contents: read
+    with:
+      prepare-command: node scripts/ci-prepare.mjs ${{ matrix.combo }}
+      cache-key: ${{ matrix.combo }}
+      playwright: true
+      playwright-install-command: pnpm --filter web exec playwright install --with-deps chromium
+      commands: |
+        pnpm test:e2e
+        pnpm test:e2e:web
+      timeout-minutes: 40
+
+  ci-ok:
+    name: ci-ok
+    if: always()
+    needs: [changes, quality, e2e, security, docker, matrix-quality, matrix-e2e]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Every job succeeded (only the matrix jobs may be skipped)
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          echo "$RESULTS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"'
+          if ! echo "$RESULTS" | jq -e 'to_entries | all(.value.result == "success"
+                or ((.key | startswith("matrix-")) and .value.result == "skipped"))' > /dev/null; then
+            echo "::error::a required job did not succeed"
+            exit 1
+          fi

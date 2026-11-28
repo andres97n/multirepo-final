@@ -19,8 +19,8 @@ export function configureApp(app: NestExpressApplication): NestExpressApplicatio
   // Request id must be assigned before routing so 404s also carry it.
   app.use(requestIdMiddleware);
 
-  // Security headers (CSP disabled: this is a JSON API, not an HTML app).
-  app.use(helmet({ contentSecurityPolicy: false }));
+  // Security headers. Helmet's default CSP also suits Swagger UI (no inline scripts).
+  app.use(helmet());
 
   // CORS allowlist from env. No credentials (tokens go in the Authorization header).
   app.enableCors({ origin: config.CORS_ORIGIN, credentials: false });

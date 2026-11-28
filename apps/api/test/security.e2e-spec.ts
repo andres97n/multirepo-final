@@ -17,6 +17,7 @@ describe('security (AC-M03.6, AC-M03.10, AC-M03.11)', () => {
   it('serves helmet headers (incl. HSTS) and no x-powered-by', async () => {
     const app = await buildApp();
     const res = await request(app.getHttpServer()).get('/api/v1/health/live');
+    expect(res.headers['content-security-policy']).toContain("script-src 'self'");
     expect(res.headers['x-content-type-options']).toBe('nosniff');
     expect(res.headers['x-frame-options']).toBe('SAMEORIGIN');
     expect(res.headers['strict-transport-security']).toMatch(/max-age=\d{6,}/);
