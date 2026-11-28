@@ -17,7 +17,7 @@
       "advisories": ["GHSA-35jh-r3h4-6jhm", "GHSA-r5fr-rjxr-66jc"],
       "reason": "AC-M13.9 test",
       "owner": "test",
-      "expires": "2027-01-31"
+      "expires": "2026-01-31"
     }
   ]
 }
