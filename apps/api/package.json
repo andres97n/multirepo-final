@@ -33,6 +33,7 @@
     "argon2": "0.45.2",
     "drizzle-orm": "0.45.4",
     "helmet": "8.3.0",
+    "lodash": "4.17.20",
     "mongoose": "9.12.3",
     "nestjs-pino": "5.3.1",
     "nestjs-zod": "5.6.0",
