@@ -48,7 +48,7 @@ jobs:
         run: node scripts/ci-changes.mjs "$BASE"
 
   quality:
-    uses: andres97n/platform-config/.github/workflows/quality.yml@614ca2a38cc28f7f74c427ba4f6431305cec613e # v1.0.0
+    uses: andres97n/platform-config/.github/workflows/quality.yml@be78f587db0bbbfb38462ba9047f5ad607ed64e4 # v1.0.0
     permissions:
       contents: read
     with:
@@ -65,7 +65,7 @@ jobs:
         pnpm --filter @repo/contracts check:exports
 
   e2e:
-    uses: andres97n/platform-config/.github/workflows/e2e.yml@614ca2a38cc28f7f74c427ba4f6431305cec613e # v1.0.0
+    uses: andres97n/platform-config/.github/workflows/e2e.yml@be78f587db0bbbfb38462ba9047f5ad607ed64e4 # v1.0.0
     permissions:
       contents: read
     with:
@@ -78,7 +78,7 @@ jobs:
       timeout-minutes: 40
 
   security:
-    uses: andres97n/platform-config/.github/workflows/security.yml@614ca2a38cc28f7f74c427ba4f6431305cec613e # v1.0.0
+    uses: andres97n/platform-config/.github/workflows/security.yml@be78f587db0bbbfb38462ba9047f5ad607ed64e4 # v1.0.0
     permissions:
       contents: read
       actions: read
@@ -89,7 +89,7 @@ jobs:
       audit-command: node scripts/audit-gate.mjs
 
   docker:
-    uses: andres97n/platform-config/.github/workflows/docker.yml@614ca2a38cc28f7f74c427ba4f6431305cec613e # v1.0.0
+    uses: andres97n/platform-config/.github/workflows/docker.yml@be78f587db0bbbfb38462ba9047f5ad607ed64e4 # v1.0.0
     permissions:
       contents: read
     with:
@@ -105,7 +105,7 @@ jobs:
       fail-fast: false
       matrix:
         combo: [mongo, postgres, postgres+auth]
-    uses: andres97n/platform-config/.github/workflows/quality.yml@614ca2a38cc28f7f74c427ba4f6431305cec613e # v1.0.0
+    uses: andres97n/platform-config/.github/workflows/quality.yml@be78f587db0bbbfb38462ba9047f5ad607ed64e4 # v1.0.0
     permissions:
       contents: read
     with:
@@ -125,7 +125,7 @@ jobs:
       fail-fast: false
       matrix:
         combo: [mongo, postgres, postgres+auth]
-    uses: andres97n/platform-config/.github/workflows/e2e.yml@614ca2a38cc28f7f74c427ba4f6431305cec613e # v1.0.0
+    uses: andres97n/platform-config/.github/workflows/e2e.yml@be78f587db0bbbfb38462ba9047f5ad607ed64e4 # v1.0.0
     permissions:
       contents: read
     with:
