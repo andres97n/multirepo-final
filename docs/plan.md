@@ -122,7 +122,7 @@ Each milestone has its own file in [`milestones/`](./milestones/). The file hold
 | M10 | [Playwright](./milestones/M10-playwright.md)                   | M09           | Done        | Prod-build browser smoke, auth / no-auth projects                                 |
 | M11 | [Module system + skills](./milestones/M11-module-system.md)    | M06, M09, M10 | Done        | `modules.json`, prune script, scaffold + adr skills, OpenCode config              |
 | M12 | [Docker](./milestones/M12-docker.md)                           | M11           | Done        | turbo-prune images, non-root, compose dev + prod-like                             |
-| M13 | [platform-config + CI](./milestones/M13-platform-config-ci.md) | M11, M12      | Not started | Central Renovate presets + reusable workflows, module matrix                      |
+| M13 | [platform-config + CI](./milestones/M13-platform-config-ci.md) | M11, M12      | In progress | Central Renovate presets + reusable workflows, module matrix                      |
 | M14 | [Perf budgets](./milestones/M14-perf-budgets.md)               | M12, M13      | Not started | Baseline, per-route JS, LHCI, image size budgets                                  |
 | M15 | [Docs](./milestones/M15-docs.md)                               | M01–M14       | Not started | Docs complete enough for an agent to work from them alone                         |
 | M16 | [v1 acceptance](./milestones/M16-acceptance.md)                | M00–M15       | Not started | Prove PRD §9 from a clean state; tag v1.0.0                                       |

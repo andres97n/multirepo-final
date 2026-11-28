@@ -2,6 +2,26 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.12.0] - 2026-11-28
+
+### Added
+
+- **ci(repo): CI on the central `platform-config` workflows (M13, tooling)** — `.github/workflows/ci.yml` calls the reusable `quality`, `e2e`, `security` and `docker` workflows of [`andres97n/platform-config`](https://github.com/andres97n/platform-config), pinned by commit SHA (ADR-0013).
+  - **Triggers:** PRs and pushes to `develop`/`main`, nightly, manual dispatch.
+  - **Default selection:** mongo+auth runs on every change.
+  - **Other combos:** mongo, postgres and postgres+auth run when `scripts/ci-changes.mjs` sees a module-system change, nightly, or on dispatch.
+  - **Required check:** `ci-ok` aggregates every job and is the only check branch protection needs.
+- **`scripts/ci-prepare.mjs [combo]`:** frozen install, or apply a combo, re-resolve the lockfile and regenerate Postgres migrations. It then writes env files with random secrets. `scripts/combos.mjs` now holds the combos and the env writer shared with `modules:matrix`.
+- **`pnpm test:coverage`:** new Turbo task. CI enforces the per-workspace coverage thresholds.
+- **`renovate.json`:** extends `github>andres97n/platform-config#v1`.
+- **`docs/FORKING.md` (draft):** how a child pins and upgrades platform-config, and the branch protection to set.
+
+### Security
+
+- **ci(repo): blocking security checks in CI (M13)** — gitleaks on the full history, CodeQL (error level), `scripts/audit-gate.mjs`, dependency-review and Trivy (CRITICAL). Levels are in `SECURITY.md`.
+- **Exceptions:** moved to `.security/exceptions.json`, each with an expiry date. `audit-gate.mjs` fails on an expired entry of any tool and on high/critical production advisories without a live exception. EXC-2026-1 is migrated.
+- **`.gitleaks.toml`:** keeps the default rules and allowlists test-fixture paths only, where the dummy secrets are deliberate.
+
 ## [0.11.1] - 2026-11-25
 
 ### Security

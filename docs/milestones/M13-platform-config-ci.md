@@ -2,7 +2,7 @@
 
 | Field      | Value                                                                                                         |
 | ---------- | ------------------------------------------------------------------------------------------------------------- |
-| Status     | Not started                                                                                                   |
+| Status     | In progress                                                                                                   |
 | Depends on | [M11](./M11-module-system.md), [M12](./M12-docker.md)                                                         |
 | PRD refs   | NFR-SEC-4, NFR-SEC-5, NFR-SEC-6, NFR-MAINT-1, NFR-MAINT-2, NFR-QUAL-1, NFR-QUAL-2, §9 acceptance (1, 2, 4, 5) |
 | Axes       | 4 (Quality), 5 (Security), 6 (Infra), cross-cutting maintenance                                               |
@@ -25,7 +25,7 @@ New sibling repo `platform-config/`: Renovate preset and reusable workflows. In 
 
 ### platform-config repo
 
-- [ ] `default.json` (Renovate preset):
+- [x] `default.json` (Renovate preset):
   - Base: `config:recommended`, `:semanticCommits`, `:dependencyDashboard`, timezone, schedule.
   - Groups: nestjs, next+react, typescript+eslint tooling, testing (vitest, playwright), types, docker base images, github-actions.
   - `minimumReleaseAge` (3 days, longer for majors).
@@ -33,7 +33,7 @@ New sibling repo `platform-config/`: Renovate preset and reusable workflows. In 
   - `vulnerabilityAlerts` labeled `security` with no schedule delay.
   - Lockfile maintenance weekly; `pinDigests` for actions and docker.
   - No deprecated keys (validated with `renovate-config-validator`).
-- [ ] Reusable workflows (`on: workflow_call`, typed `inputs`):
+- [x] Reusable workflows (`on: workflow_call`, typed `inputs`):
   - `quality.yml`: checkout, pnpm setup + store cache, turbo cache; format:check, `modules:check`, lint, typecheck, test with coverage (thresholds enforced), build.
   - `e2e.yml`: api e2e with DB service (input `db`), Playwright with prod build (input `auth`); upload traces on failure.
   - `security.yml`:
@@ -42,27 +42,36 @@ New sibling repo `platform-config/`: Renovate preset and reusable workflows. In 
     - `pnpm audit --prod --audit-level=high` (blocks high/critical in production deps; dev deps report only).
     - `dependency-review` on PRs (fails on high plus disallowed licenses).
   - `docker.yml`: build images (buildx + cache), smoke via compose, Trivy scan (blocks CRITICAL), image size check against an input budget.
-  - `perf.yml`: skeleton; bundle and LHCI steps wired in M14.
+  - ~~`perf.yml`: skeleton~~ deferred to M14 (a skeleton would only duplicate `quality.yml`; see ADR-0013).
   - All workflows: top-level `permissions: {}` with per-job minimal grants, every `uses:` pinned by full SHA (comment with version), `concurrency` cancel-in-progress, `timeout-minutes` set.
-- [ ] Self-CI for platform-config: actionlint, renovate-config-validator, zizmor (workflow security lint).
+- [x] Self-CI for platform-config: actionlint, renovate-config-validator, zizmor (workflow security lint).
 - [ ] Release: tag `v1.0.0` and move the floating `v1` tag; CHANGELOG.
 
 ### Boilerplate
 
-- [ ] `.github/workflows/ci.yml` (PR + push main):
+- [x] `.github/workflows/ci.yml` (PRs + pushes to `develop`/`main`, nightly, dispatch):
   - Calls quality, security and docker on the default selection.
   - **Module matrix** job: for {mongo, mongo+auth, postgres, postgres+auth}, run `modules:apply`, then quality + e2e.
   - Reusable workflows referenced by SHA (Renovate keeps them updated).
-- [ ] `renovate.json`: `{ "extends": ["github>andres97n/platform-config#v1"] }` plus a documented `packageRules` slot for local exceptions.
-- [ ] `SECURITY.md`:
+- [x] `renovate.json`: `{ "extends": ["github>andres97n/platform-config#v1"] }` plus a documented `packageRules` slot for local exceptions.
+- [x] `SECURITY.md`:
   - Supported versions; how to report.
   - Blocking-severity table per tool.
-  - Exception process: `.security/exceptions.yaml` with id, reason, owner and expiry date. Expired exceptions fail CI.
-- [ ] Branch protection recommendations documented (required checks list).
+  - Exception process: `.security/exceptions.json` (JSON, not YAML: no parser dependency) with id, tool, advisories, reason, owner and expiry date. Expired exceptions fail CI (`scripts/audit-gate.mjs`).
+- [x] Branch protection recommendations documented (single required check `ci-ok`, in `docs/FORKING.md`).
+
+## Implementation notes
+
+- Workflows are generic runners (setup, caches, `prepare-command`, `commands`); project logic lives in `scripts/ci-prepare.mjs`, `scripts/ci-changes.mjs`, `scripts/audit-gate.mjs` and `scripts/combos.mjs` (shared with `modules-matrix.mjs`), all tested in `scripts/ci-scripts.test.mjs`.
+- Matrix: every run covers the default selection (mongo+auth); the other three combos run when `ci-changes.mjs` sees a module-system change, nightly on `main`, or on dispatch. `ci-ok` aggregates all jobs.
+- Coverage: new Turbo task `test:coverage`; CI runs `pnpm test:coverage` (AC-M13.12).
+- `.gitleaks.toml` allowlists test-fixture paths only (dummy secrets in specs); default rules apply everywhere else.
+- Exceptions: `.security/exceptions.json` (instead of `.yaml`).
+- Docker: Trivy and gitleaks run from their official images pinned by digest (no third-party actions); image sizes reported, budgets come in M14 via `image-budgets-mb`.
 
 ## Deliverables
 
-`platform-config/{default.json,.github/workflows/*.yml,README.md,CHANGELOG.md}`; boilerplate `.github/workflows/ci.yml`, `renovate.json`, `SECURITY.md`, `.security/exceptions.yaml`.
+`platform-config/{default.json,.github/workflows/*.yml,README.md,CHANGELOG.md}`; boilerplate `.github/workflows/ci.yml`, `renovate.json`, `SECURITY.md`, `.security/exceptions.json`, `.gitleaks.toml`, `scripts/{ci-prepare,ci-changes,audit-gate,combos}.mjs`, `docs/FORKING.md` (draft), ADR-0013.
 
 ## Acceptance criteria
 
@@ -89,7 +98,7 @@ New sibling repo `platform-config/`: Renovate preset and reusable workflows. In 
 
 ### Docs
 
-- **AC-M13.13** ADR-0012 "Central platform-config: Renovate presets + reusable workflows" is written. `docs/FORKING.md` (draft) explains how a child pins and upgrades platform-config. `SECURITY.md` is complete.
+- **AC-M13.13** ADR-0013 "Central platform-config: Renovate presets + reusable workflows" is written. `docs/FORKING.md` (draft) explains how a child pins and upgrades platform-config. `SECURITY.md` is complete.
 
 ## Verification
 
@@ -99,7 +108,7 @@ New sibling repo `platform-config/`: Renovate preset and reusable workflows. In 
 
 ## ADRs produced
 
-- ADR-0012 Central platform-config repo (Renovate presets + reusable CI), pinning and upgrade policy.
+- ADR-0013 Central platform-config repo (Renovate presets + reusable CI), pinning and upgrade policy.
 
 ## Risks & mitigations
 
@@ -112,4 +121,4 @@ New sibling repo `platform-config/`: Renovate preset and reusable workflows. In 
 
 ## Definition of Done
 
-All ACs pass, both repos are green, ADR-0012 is merged, the commit is made and the status is set to Done.
+All ACs pass, both repos are green, ADR-0013 is merged, the commit is made and the status is set to Done.
